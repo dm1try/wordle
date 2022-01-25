@@ -11,4 +11,10 @@ describe 'App', type: :rack do
     expect(last_response).to be_ok
     expect(last_response.body).to include('New Game')
   end
+
+  it 'opens a game page' do
+    get '/game'
+    expect(last_response).to be_ok
+    expect(last_response.body).to include('Game')
+  end
 end
