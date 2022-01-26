@@ -13,7 +13,8 @@ class App
     end
   end
 
+  GAME_HTML = IO.read(File.join(__dir__, 'public/game.html'))
   def call(env)
-    [200, {'Content-Type' => 'text/html'}, ['Game']]
+    [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
   end
 end
