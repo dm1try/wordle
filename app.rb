@@ -27,8 +27,12 @@ class App
           game_id = msg["game_id"]
 
           if game = $games[game_id]
-            attempt_result = game.attempt(msg["word"])
-            {status: 'ok', message: {game: {status: $games[game_id].status, attempts: $games[game_id].attempts}}}
+            begin
+              attempt_result = game.attempt(msg["word"])
+              {status: 'ok', message: {game: {status: $games[game_id].status, attempts: $games[game_id].attempts}}}
+            rescue ArgumentError => e
+              {status: 'error', message: e.message}
+            end
           else
             {status: 'error', message: 'Game not found'}
           end
