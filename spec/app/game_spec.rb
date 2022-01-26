@@ -41,4 +41,10 @@ describe Game do
     subject.attempt("plain")
     expect(subject.attempts).to eq([["plain", [2, 2, 2, 2, 2]]])
   end
+
+  context 'when a word is not 5-letters long' do
+    it 'raises an error' do
+      expect { subject.attempt("plai") }.to raise_error(ArgumentError)
+    end
+  end
 end

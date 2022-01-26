@@ -13,6 +13,7 @@ class Game
   end
 
   def attempt(word)
+    raise ArgumentError, 'word must have 5 letters' unless word.size == 5
     return if @status == :won || @status == :lost
 
     comparasion_result =
