@@ -5,6 +5,53 @@
 </head>
 <body>
   <h1>Wordle</h1>
+  <h2>Game ID: <span id="game_id"></span></h2>
+  <div id="status"></div>
+  <div id="msg"></div>
+  <input type="text" id="word_input"/>
+  <script>
+    var game_id = location.pathname.split('/')[2];
+    document.getElementById('game_id').innerText = game_id;
+
+    var connect = function () {
+      var gameSocket = new WebSocket("ws://" + location.host);
+
+      gameSocket.onopen = function (event) {
+        document.querySelector('#status').innerText = 'connected';
+        gameSocket.send(JSON.stringify({
+          type: 'join',
+          game_id: game_id
+        }));
+      };
+      gameSocket.onclose = function (event) {
+        document.querySelector('#status').innerText = 'disconnected';
+        setTimeout(function () {
+          // gameSocket.removeAllListeners();
+          connect();
+        }, 1000);
+      }
+      gameSocket.onmessage = function (event) {
+        document.querySelector('#msg').innerText = event.data;
+        console.log(event.data);
+      }
+
+      return gameSocket;
+    };
+
+   var gameSocket = connect();
+    
+    var word_input = document.querySelector('#word_input');
+    word_input.addEventListener('keyup', function (event) {
+          if (event.keyCode === 13) {
+                gameSocket.send(JSON.stringify({
+                      game_id: game_id,
+                      type: 'attempt',
+                      word: word_input.value
+                    }));
+                word_input.value = '';
+              }
+        });
+  </script>
 </body>
 </html>
 
