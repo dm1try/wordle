@@ -5,6 +5,7 @@ $games = {}
 class App
   def self.build
     Rack::Builder.new do
+      use Rack::Static, :urls => ["/js", "/css"], :root => "public"
       use Rack::Static, :urls => {"/" => "new.html"}, :root => "public"
       run App.new
     end

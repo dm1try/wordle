@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
   <title>WWWordle</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 </head>
 <body>
   <h1>Wordle</h1>
   <h2>Game ID: <span id="game_id"></span></h2>
   <div id="status"></div>
   <div id="msg"></div>
+  <div id="board"></div>
+  <script src="/js/board.js"></script>
+  <script>
+    const boardContainer = document.querySelector('#board');
+    </script>
   <input type="text" id="word_input"/>
   <script>
     var game_id = location.pathname.split('/')[2];
@@ -33,6 +40,10 @@
       gameSocket.onmessage = function (event) {
         document.querySelector('#msg').innerText = event.data;
         console.log(event.data);
+        var data = JSON.parse(event.data);
+
+        var attempts = data.message.game.attempts;
+        ReactDOM.render(React.createElement(Board, {attempts: attempts}), boardContainer);
       }
 
       return gameSocket;
