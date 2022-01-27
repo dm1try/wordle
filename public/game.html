@@ -1,68 +1,113 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <title>WWWordle</title>
-  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-</head>
-<body>
-  <h1>Wordle</h1>
-  <h2>Game ID: <span id="game_id"></span></h2>
-  <div id="status"></div>
-  <div id="msg"></div>
-  <div id="board"></div>
-  <script src="/js/board.js"></script>
-  <script>
-    const boardContainer = document.querySelector('#board');
-    </script>
-  <input type="text" id="word_input"/>
-  <script>
-    var game_id = location.pathname.split('/')[2];
-    document.getElementById('game_id').innerText = game_id;
+  <head>
+    <title>WWWordle</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="flex flex-col justify-center items-center font-sans m-4">
+    <div class="flex">
+      <h1 class="flex-1 text-5xl py-2">WORDLE</h1>
+      <div id="status" class="w-2 h-2 border-1 rounded bg-red-500"></div>
+    </div>
+    <div class="max-w-sm w-full">
 
-    var connect = function () {
-      var gameSocket = new WebSocket("ws://" + location.host);
+      <div tabindex="0" autofocus="true" style="outline: none" id="board"></div>
 
-      gameSocket.onopen = function (event) {
-        document.querySelector('#status').innerText = 'connected';
-        gameSocket.send(JSON.stringify({
-          type: 'join',
-          game_id: game_id
-        }));
-      };
-      gameSocket.onclose = function (event) {
-        document.querySelector('#status').innerText = 'disconnected';
-        setTimeout(function () {
-          // gameSocket.removeAllListeners();
-          connect();
-        }, 1000);
-      }
-      gameSocket.onmessage = function (event) {
-        document.querySelector('#msg').innerText = event.data;
-        console.log(event.data);
-        var data = JSON.parse(event.data);
+      <input id="word_input"></input>
+      <div class="my-2">
+        <label class="inline-block text" for="game_id">Play together:</label>
+        <div class="my-2 flex">
+          <input class="flex-1 rounded border text-ellipsis" id="game_id" readonly></input>
+          <button id="copy" class="rounded border px-1 py-1 bg-blue-600 text-gray-50" >Copy</button>
+        </div>
+      </div>
+      <form action="/new" method="post" class="bg-transparent flex justify-center">
+        <button class="inline-flex items-center px-3 py-1 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
+          Start a new game
+        </button>
+      </form>
+      <script src="/js/board.js"></script>
+      <script>
+        const boardContainer = document.querySelector('#board');
+        ReactDOM.render(React.createElement(Board, {attempts: [], current_word: ''}), boardContainer);
 
-        var attempts = data.message.game.attempts;
-        ReactDOM.render(React.createElement(Board, {attempts: attempts}), boardContainer);
-      }
+        var game_id = location.pathname.split('/')[2];
+        var current_word = '';
+        var attempts = [];
+        document.getElementById('game_id').value = location;
 
-      return gameSocket;
-    };
+        var connect = function () {
+                  var gameSocket = new WebSocket("ws://" + location.host);
 
-   var gameSocket = connect();
-    
-    var word_input = document.querySelector('#word_input');
-    word_input.addEventListener('keyup', function (event) {
-          if (event.keyCode === 13) {
-                gameSocket.send(JSON.stringify({
-                      game_id: game_id,
-                      type: 'attempt',
-                      word: word_input.value
-                    }));
-                word_input.value = '';
-              }
-        });
-  </script>
-</body>
+                  gameSocket.onopen = function (event) {
+                            var statusClassList = document.getElementById('status').classList;
+                            statusClassList.remove('bg-red-500');
+                            statusClassList.add('bg-green-500');
+                            gameSocket.send(JSON.stringify({
+                                      type: 'join',
+                                      game_id: game_id
+                                    }));
+                          };
+                  gameSocket.onclose = function (event) {
+                            var statusClassList = document.getElementById('status').classList;
+                            statusClassList.remove('bg-green-500');
+                            statusClassList.add('bg-red-500');
+
+                            setTimeout(function () {
+                                      // gameSocket.removeAllListeners();
+                                      connect();
+                                    }, 1000);
+                          }
+                  gameSocket.onmessage = function (event) {
+                            console.log(event.data);
+                            var data = JSON.parse(event.data);
+
+
+                            if(data.status == 'ok') {
+                                      attempts = data.message.game.attempts;
+                                    }else{
+                                              current_word = '';
+                                            }
+                            ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                          }
+
+                  return gameSocket;
+                };
+
+        var gameSocket = connect();
+
+
+        var word_input = document.querySelector('body');
+        word_input.addEventListener('keyup', function (event) {
+                  if (event.keyCode === 13) {
+                            gameSocket.send(JSON.stringify({
+                                      game_id: game_id,
+                                      type: 'attempt',
+                                      word: current_word
+                                    }));
+                            current_word = '';
+                          } else if(event.keyCode === 8) {
+                                    current_word = current_word.slice(0, -1);
+                                    ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                                  }else{
+                                            if(current_word.length < 5){
+                                                      current_word += event.key;
+                                                    }
+                                            ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                                          }
+                });
+
+        var copy_input = document.getElementById('copy');
+        copy_input.addEventListener('click', function (event) {
+                  document.getElementById('game_id').select();
+                  document.execCommand('copy');
+                });
+      </script>
+    </div>
+  </body>
 </html>
 

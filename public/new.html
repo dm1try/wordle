@@ -1,8 +1,16 @@
 <html>
-  <body>
-    New Game
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="flex flex-col justify-center items-center">
+    <div class="max-w-sm w-full">
+      <form action="/new" method="post" class="bg-transparent flex justify-center">
+        <button class="inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
+          Start a new game
+        </button>
+      </form>
+    </div>
   </body>
-  <form action="/new" method="post">
-    <button > start </button>
-  </form>
 </html>

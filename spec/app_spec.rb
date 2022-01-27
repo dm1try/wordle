@@ -15,17 +15,16 @@ describe "Wordle", type: :feature do
     Process.kill("TERM", @server_pid)
   end
 
-  it "allows to play a new game" do
+  it "allows to play a new game and win :)" do
     visit '/'
-    expect(page).to have_content 'New Game'
+    expect(page).to have_content 'Start a new game'
 
-    click_button 'start'
-    expect(page).to have_content 'Wordle'
-    expect(page).to have_content 'connected'
+    find("button", :text => "Start a new game").click
+    expect(page).to have_content 'WORDLE'
     
-    fill_in 'word_input', with: "plain\n"
+    find("body").send_keys("plain\n")
 
-    expect(page).to have_content 'won'
+    expect(page).to have_content "P\nL\nA\nI\nN\n"
   end
 end
 
