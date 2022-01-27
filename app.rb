@@ -40,7 +40,7 @@ class App
 
       conn.send(JSON.generate(response))
     end
-  rescue JSON::ParserError => e
+  rescue => e
     puts e
   end
 
