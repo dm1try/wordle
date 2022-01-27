@@ -14,3 +14,8 @@ group :test do
   gem "capybara", "~> 3.36"
   gem "webdrivers", "~> 5.0"
 end
+
+
+gem "hiredis", "~> 0.6.3"
+
+gem "redis", "~> 4.5"

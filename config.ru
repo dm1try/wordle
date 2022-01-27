@@ -1,6 +1,7 @@
 require 'bundler/setup'
 require 'tipi'
 require 'tipi/websocket'
+require_relative './db'
 require_relative './app'
 
 puts "pid: #{Process.pid}"
