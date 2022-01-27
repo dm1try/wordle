@@ -16,6 +16,9 @@
     <div class="max-w-sm w-full">
 
       <div tabindex="0" autofocus="true" style="outline: none" id="board"></div>
+      <div class="m-2 border px-4 py-3 rounded relative text-center" role="alert">
+        <span id="game_status" class="block sm:inline">Something seriously bad happened.</span>
+      </div>
 
       <input id="word_input"></input>
       <div class="my-2">
@@ -66,11 +69,23 @@
                             console.log(event.data);
                             var data = JSON.parse(event.data);
 
+                            var gameStatusElement = document.getElementById('game_status');
 
                             if(data.status == 'ok') {
                                       attempts = data.message.game.attempts;
-                                    }else{
+
+                                      var gameStatus = data.message.game.status;
+                                      if (gameStatus == 'won') {
+                                                gameStatusElement.innerText = 'You have win!';
+                                              } else if(gameStatus == 'lost') {
+                                                        gameStatusElement.innerText = 'You will definitely win next time!';
+                                                      } else {
+                                                                gameStatusElement.innerText = 'In progress...';
+                                                              }
+
+                                    } else {
                                               current_word = '';
+                                              gameStatusElement.innerText = 'Error occured. Try again!';
                                             }
                             ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
                           }
