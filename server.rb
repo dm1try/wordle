@@ -9,4 +9,5 @@ opts = {
   }
 }
 
-Tipi.serve('0.0.0.0', 1234, opts, &app)
+port = ENV['PORT'] || 1234
+Tipi.serve('0.0.0.0', port, opts, &app)
