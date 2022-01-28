@@ -109,8 +109,9 @@
                                     current_word = current_word.slice(0, -1);
                                     ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
                                   }else{
-                                            if(current_word.length < 5 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 97 && event.keyCode <= 122))) {
-                                                      current_word += event.key;
+                                            var lowercased_key = event.key.toLowerCase();
+                                            if(current_word.length < 5 && lowercased_key.length == 1 && (lowercased_key.match(/[a-z]/g) || lowercased_key.match(/[а-я]/g))){
+                                                      current_word += lowercased_key;
                                                       ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
                                                     }
                                           }
