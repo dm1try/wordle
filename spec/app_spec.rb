@@ -8,7 +8,7 @@ Capybara.app_host = 'http://127.0.0.1:1234'
 
 describe "Wordle", type: :feature do
   before do
-    @server_pid = Process.spawn("bundle exec tipi server.rb")
+    @server_pid = Process.spawn("APP_ENV=test REDIS_URL=redis://localhost:6379/2 bundle exec tipi server.rb")
   end
 
   after do
