@@ -25,6 +25,7 @@ describe "Wordle", type: :feature do
     find("body").send_keys("plain\n")
 
     expect(page).to have_content "P\nL\nA\nI\nN\n"
+    expect(page).to have_content "You win!"
   end
 end
 
