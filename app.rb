@@ -18,6 +18,8 @@ class App
         when "join"
           game_id = msg["game_id"]
 
+          $publisher.subscribe(game_id, conn)
+
           if $games[game_id]
             {status: 'ok', message: {game: {status: $games[game_id].status, attempts: $games[game_id].attempts}}}
           else
@@ -39,8 +41,10 @@ class App
         end
 
       conn.send(JSON.generate(response))
+      $publisher.publish(game_id, JSON.generate(response), conn)
     end
   rescue => e
+   $publisher.unsubscribe(game_id, conn)
     puts e
   end
 
