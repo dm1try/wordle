@@ -85,7 +85,7 @@
 
                                     } else {
                                               current_word = '';
-                                              gameStatusElement.innerText = 'Error occured. Try again!';
+                                              gameStatusElement.innerText = data.message;
                                             }
                             ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
                           }

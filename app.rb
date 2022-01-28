@@ -30,8 +30,12 @@ class App
 
           if game = $games[game_id]
             begin
-              attempt_result = game.attempt(msg["word"])
-              {status: 'ok', message: {game: {status: $games[game_id].status, attempts: $games[game_id].attempts}}}
+              if $redis.sismember('words', msg["word"])
+                game.attempt(msg["word"])
+                {status: 'ok', message: {game: {status: game.status, attempts: game.attempts}}}
+              else
+                {status: 'error', message: 'Word not found'}
+              end
             rescue ArgumentError => e
               {status: 'error', message: e.message}
             end
