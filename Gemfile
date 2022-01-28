@@ -21,3 +21,5 @@ gem "hiredis", "~> 0.6.3"
 gem "redis", "~> 4.5"
 
 gem "nokogiri", "~> 1.13", :group => :development
+
+gem "mina", "~> 1.2", :group => :development
