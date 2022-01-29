@@ -22,9 +22,14 @@ class Button extends React.Component {
   render() {
     var classPress = this.state.pressed ? 'bg-gray-300' : '';
 
+    var textColorClass = 'text-' + this.props.color + '-600';
+    if (this.props.marked) {
+      textColorClass = 'text-gray-200';
+    }
+
     return (
       React.createElement("button", {
-        className: classPress + " bg-gray-100 border text-2xl rounded px-1 py-1 text-" + this.props.color + "-600",
+        className: classPress + " bg-gray-100 border text-2xl rounded px-1 py-1 " + textColorClass,
         onMouseDown: this.onMouseDown.bind(this),
         onMouseUp: this.onMouseUp.bind(this),
       },
@@ -46,6 +51,7 @@ class ButtonsRow extends React.Component {
               code: button,
               display: button.toUpperCase(),
               color: "black",
+              marked: this.props.marked_buttons.includes(button),
               onKeyPress: this.props.onKeyPress
             })
           } else {
@@ -54,6 +60,7 @@ class ButtonsRow extends React.Component {
               code: button.code,
               display: button.display || button.code.toUpperCase(),
               color: button.color || "black",
+              marked: this.props.marked_buttons.includes(button.code),
               onKeyPress: this.props.onKeyPress
             })
           }
@@ -65,6 +72,7 @@ class ButtonsRow extends React.Component {
 
 class Keyboard extends React.Component {
   render(){
+
     return  React.createElement(
       'div',
       { className: 'keyboard grid grid-rows-3 gap-1' },
@@ -72,6 +80,7 @@ class Keyboard extends React.Component {
         return React.createElement(ButtonsRow, {
           key: index,
           buttons: row,
+          marked_buttons: this.props.marked_buttons || [],
           onKeyPress: this.props.onKeyPress
         })
       })

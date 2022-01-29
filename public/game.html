@@ -45,6 +45,34 @@
         var attempts = [];
         document.getElementById('game_id').value = location;
 
+        var russian_keyboard = [ 
+                  ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ'],
+                  ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
+                  [
+                            {code: 'backspace', display: '⌫', color: 'red'},
+                            'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю',
+                            { code: 'enter', display: '⏎', color: 'green' }
+                          ]
+                ];
+        var handleKeyboardClick = function(key) {
+                  if(key == 'backspace') {
+                            current_word = current_word.slice(0, -1);
+                            ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                          }else if(key == 'enter') {
+                                    gameSocket.send(JSON.stringify({
+                                              game_id: game_id,
+                                              type: 'attempt',
+                                              word: current_word
+                                            }));
+                                    current_word = '';
+                                  }else{
+                                            if(current_word.length < 5) {
+                                                      current_word += key;
+                                                      ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                                                    }
+                                          }
+                };
+
         var connect = function () {
                   var gameSocket = new WebSocket("ws://" + location.host);
 
@@ -76,6 +104,31 @@
                             if(data.status == 'ok') {
                                       attempts = data.message.game.attempts;
 
+                                      not_found_letters =
+                                        data.message.game.attempts.reduce(function (not_found_letters, attempt) {
+                                                  var attempt_word = attempt[0];
+                                                  var attempt_match = attempt[1];
+
+                                                  var not_found_letters_in_word =
+                                                    attempt_match.reduce(function (not_found_letters, match, index) {
+                                                              if(match == 0) {
+                                                                        not_found_letters.push(attempt_word[index]);
+                                                                      }
+                                                              return not_found_letters;
+                                                            }, []); 
+
+                                                  not_found_letters = not_found_letters.concat(not_found_letters_in_word);
+                                                  return not_found_letters;
+                                                }, []);
+
+                                      ReactDOM.render(
+                                                React.createElement(Keyboard,{
+                                                          rows: russian_keyboard,
+                                                          onKeyPress: handleKeyboardClick,
+                                                          marked_buttons: not_found_letters
+                                                        }),
+                                                document.getElementById('keyboard')
+                                              );
                                       var gameStatus = data.message.game.status;
                                       if (gameStatus == 'won') {
                                                 gameStatusElement.innerText = 'You win!';
@@ -126,36 +179,11 @@
                 });
       </script>
     <script>
-      var russian_keyboard = [ 
-              ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ'],
-              ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
-              [
-                      {code: 'backspace', display: '⌫', color: 'red'},
-                      'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю',
-                      { code: 'enter', display: '⏎', color: 'green' }
-                    ]
-            ];
       ReactDOM.render(
               React.createElement(Keyboard,{
                             rows: russian_keyboard,
-                      onKeyPress: function(key) {
-                              if(key == 'backspace') {
-                                        current_word = current_word.slice(0, -1);
-                                        ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                              }else if(key == 'enter') {
-                                        gameSocket.send(JSON.stringify({
-                                                  game_id: game_id,
-                                                  type: 'attempt',
-                                                  word: current_word
-                                                }));
-                                        current_word = '';
-                              }else{
-                                      if(current_word.length < 5) {
-                                              current_word += key;
-                                              ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                                            }
-                                    }
-                            }}),
+                      onKeyPress: handleKeyboardClick
+                    }),
               document.getElementById('keyboard')
             );
       </script>
