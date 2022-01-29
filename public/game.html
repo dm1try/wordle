@@ -9,6 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="flex flex-col justify-center items-center font-sans m-4">
+    <script src="/js/keyboard.js"></script>
+
     <div class="flex">
       <h1 class="flex-1 text-xl font-bold py-2">WORDLE</h1>
       <div id="status" class="w-2 h-2 border-1 rounded bg-red-500"></div>
@@ -19,6 +21,7 @@
       <div class="m-2 border px-4 py-3 rounded relative text-center" role="alert">
         <span id="game_status" class="block sm:inline">Something seriously bad happened.</span>
       </div>
+      <div id="keyboard"></div>
 
       <div class="my-2">
         <label class="inline-block text" for="game_id">Play together:</label>
@@ -121,6 +124,40 @@
                   document.getElementById('game_id').select();
                   document.execCommand('copy');
                 });
+      </script>
+    <script>
+      var russian_keyboard = [ 
+              ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ'],
+              ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
+              [
+                      {code: 'backspace', display: '⌫', color: 'red'},
+                      'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю',
+                      { code: 'enter', display: '⏎', color: 'green' }
+                    ]
+            ];
+      ReactDOM.render(
+              React.createElement(Keyboard,{
+                            rows: russian_keyboard,
+                      onKeyPress: function(key) {
+                              if(key == 'backspace') {
+                                        current_word = current_word.slice(0, -1);
+                                        ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                              }else if(key == 'enter') {
+                                        gameSocket.send(JSON.stringify({
+                                                  game_id: game_id,
+                                                  type: 'attempt',
+                                                  word: current_word
+                                                }));
+                                        current_word = '';
+                              }else{
+                                      if(current_word.length < 5) {
+                                              current_word += key;
+                                              ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
+                                            }
+                                    }
+                            }}),
+              document.getElementById('keyboard')
+            );
       </script>
     </div>
   </body>
