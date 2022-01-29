@@ -1,6 +1,6 @@
 class WordLetter extends React.Component {
   render(){
-    var className =  'text-center text-4xl leading-normal box-border h-16  border-2 text-bold uppercase';
+    var className =  'text-center text-4xl leading-relaxed h-16 text-extrabold uppercase';
 
     if (this.props.match == 1) {
       className += ' bg-yellow-500 text-white';
@@ -8,6 +8,8 @@ class WordLetter extends React.Component {
       className += ' bg-green-500 text-white';
     } else if(this.props.match == 0) {
       className += ' bg-gray-500 text-white';
+    }else {
+      className += ' border-2';
     }
 
     return  React.createElement(
@@ -68,7 +70,7 @@ class Board extends React.Component {
 
     return React.createElement(
       'div',
-      { className: 'grid grid-cols-5 gap-2' },
+      { className: 'grid grid-cols-5 gap-1' },
       attempt_items
     );
   }
