@@ -57,7 +57,7 @@ class App
     req = Rack::Request.new(env)
     if req.path == '/new'
       game_id = SecureRandom.uuid
-      game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'words')
+      game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
       $games[game_id] = Game.new(game_dictionary)
       [200, {'Content-Type' => 'text/html'}, [GAME_HTML.gsub('{{game_id}}', game_id)]]
       [302, {'Location' => "/games/#{game_id}"}, []]
