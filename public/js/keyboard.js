@@ -20,7 +20,7 @@ class Button extends React.Component {
   }
 
   render() {
-    var classPress = this.state.pressed ? 'bg-gray-300' : '';
+    var bgColorClass = this.state.pressed ? 'bg-gray-300' : 'bg-gray-100';
 
     var textColorClass = 'text-' + this.props.color + '-600';
     if (this.props.marked) {
@@ -29,7 +29,7 @@ class Button extends React.Component {
 
     return (
       React.createElement("button", {
-        className: classPress + " bg-gray-100 border text-2xl rounded px-1 py-1 " + textColorClass,
+        className: bgColorClass + " border text-2xl rounded px-1 py-1 " + textColorClass,
         onMouseDown: this.onMouseDown.bind(this),
         onMouseUp: this.onMouseUp.bind(this),
       },
