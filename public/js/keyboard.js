@@ -1,13 +1,32 @@
 class Button extends React.Component {
-  onClick() {
+  constructor(props) {
+    super(props);
+    this.state = {
+      pressed: false
+    };
+  }
+
+  onMouseDown() {
+    this.setState({
+      pressed: true
+    });
+  }
+
+  onMouseUp() {
+    this.setState({
+      pressed: false
+    });
     this.props.onKeyPress(this.props.code);
   }
 
   render() {
+    var classPress = this.state.pressed ? 'bg-gray-300' : '';
+
     return (
       React.createElement("button", {
-        className: "bg-gray-100 border text-2xl rounded px-1 py-1 text-" + this.props.color + "-600",
-        onClick: this.onClick.bind(this)
+        className: classPress + " bg-gray-100 border text-2xl rounded px-1 py-1 text-" + this.props.color + "-600",
+        onMouseDown: this.onMouseDown.bind(this),
+        onMouseUp: this.onMouseUp.bind(this),
       },
       this.props.display || this.props.code.toUpperCase())
     );
