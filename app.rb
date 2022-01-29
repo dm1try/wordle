@@ -1,5 +1,5 @@
 require_relative './app/game'
-
+require_relative './app/game/dictionary/redis'
 $games = {}
 
 class App
@@ -57,7 +57,8 @@ class App
     req = Rack::Request.new(env)
     if req.path == '/new'
       game_id = SecureRandom.uuid
-      $games[game_id] = Game.new($redis.srandmember('words'))
+      game_word = Game::Dictionary::Redis.new($redis, 'words', 'words').random_target_word
+      $games[game_id] = Game.new(game_word)
       [200, {'Content-Type' => 'text/html'}, [GAME_HTML.gsub('{{game_id}}', game_id)]]
       [302, {'Location' => "/games/#{game_id}"}, []]
     elsif req.path.match?(/games\/(.*)/)
