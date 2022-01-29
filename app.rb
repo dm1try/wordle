@@ -30,7 +30,7 @@ class App
 
           if game = $games[game_id]
             begin
-              if $redis.sismember('words', msg["word"])
+              if game.word_available?(msg["word"])
                 game.attempt(msg["word"])
                 {status: 'ok', message: {game: {status: game.status, attempts: game.attempts}}}
               else
@@ -57,8 +57,8 @@ class App
     req = Rack::Request.new(env)
     if req.path == '/new'
       game_id = SecureRandom.uuid
-      game_word = Game::Dictionary::Redis.new($redis, 'words', 'words').random_target_word
-      $games[game_id] = Game.new(game_word)
+      game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'words')
+      $games[game_id] = Game.new(game_dictionary)
       [200, {'Content-Type' => 'text/html'}, [GAME_HTML.gsub('{{game_id}}', game_id)]]
       [302, {'Location' => "/games/#{game_id}"}, []]
     elsif req.path.match?(/games\/(.*)/)

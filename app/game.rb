@@ -6,10 +6,15 @@ class Game
 
   attr_reader :word, :attempts, :status
 
-  def initialize(word)
-    @word = word
+  def initialize(dictionary)
+    @dictionary = dictionary
     @attempts = []
     @status = :in_progress
+    @word = @dictionary.random_target_word
+  end
+
+  def word_available?(word)
+    @dictionary.available?(word)
   end
 
   def attempt(word)
