@@ -10,6 +10,13 @@ class GameUpdatesPublisher
     spin do
       loop do
         game_id, message, initiator = @updates.pop
+        puts "PUBLISHING: #{game_id} #{message}\n"
+
+        if @connections[game_id].nil?
+          puts "No connections for game #{game_id}"
+          next
+        end
+
         @connections[game_id].each do |connection|
           next if connection == initiator
           begin
