@@ -59,10 +59,9 @@ class App
       game_id = SecureRandom.uuid
       game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
       $games[game_id] = Game.new(game_dictionary)
-      [200, {'Content-Type' => 'text/html'}, [GAME_HTML.gsub('{{game_id}}', game_id)]]
       [302, {'Location' => "/games/#{game_id}"}, []]
     elsif req.path.match?(/games\/(.*)/)
-      [200, {'Location' => "/games/#{game_id}"}, [GAME_HTML]]
+      [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
     else
       [404, {'Content-Type' => 'text/html'}, ['Not Found']]
     end
