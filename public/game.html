@@ -8,22 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="flex flex-col justify-center items-center font-sans m-4">
+  <body>
+    <script src="/js/game_box.js"></script>
     <script src="/js/keyboard.js"></script>
 
-    <div class="flex">
-      <h1 class="flex-1 text-xl font-bold py-2">WORDLE</h1>
-      <div id="status" class="w-2 h-2 border-1 rounded bg-red-500"></div>
-    </div>
-    <div class="max-w-sm w-full">
-
-      <div tabindex="0" autofocus="true" style="outline: none" id="board"></div>
-      <div class="m-2 border px-4 py-3 rounded relative text-center" role="alert">
-        <span id="game_status" class="block sm:inline">Something seriously bad happened.</span>
-      </div>
-      <div id="keyboard"></div>
-
-      <div class="my-2">
+    <div class="flex flex-col justify-center items-center font-sans m-4">
+      <div id="game_box"></div>
+      <div class="my-2 w-full max-w-sm">
         <label class="inline-block text" for="game_id">Play together:</label>
         <div class="my-2 flex">
           <input class="flex-1 rounded border text-ellipsis" id="game_id" readonly></input>
@@ -35,159 +26,82 @@
           Start a new game
         </button>
       </form>
+    </div>
       <script src="/js/board.js"></script>
       <script>
-        const boardContainer = document.querySelector('#board');
-        ReactDOM.render(React.createElement(Board, {attempts: [], current_word: ''}), boardContainer);
-
         var game_id = location.pathname.split('/')[2];
-        var current_word = '';
-        var attempts = [];
-        document.getElementById('game_id').value = location;
-
-        var russian_keyboard = [ 
-                  ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ'],
-                  ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
-                  [
-                            {code: 'backspace', display: '⌫', color: 'red'},
-                            'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю',
-                            { code: 'enter', display: '⏎', color: 'green' }
-                          ]
-                ];
-        var handleKeyboardClick = function(key) {
-                  if(key == 'backspace') {
-                            current_word = current_word.slice(0, -1);
-                            ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                          }else if(key == 'enter') {
-                                    gameSocket.send(JSON.stringify({
-                                              game_id: game_id,
-                                              type: 'attempt',
-                                              word: current_word
-                                            }));
-                                    current_word = '';
-                                  }else{
-                                            if(current_word.length < 5) {
-                                                      current_word += key;
-                                                      ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                                                    }
-                                          }
-                };
+        var last_game = {attempts: [], status: 'offline'};
 
         var connect = function () {
-                  var gameSocket = new WebSocket("ws://" + location.host);
+          var gameSocket = new WebSocket("ws://" + location.host);
 
-                  gameSocket.onopen = function (event) {
-                            var statusClassList = document.getElementById('status').classList;
-                            statusClassList.remove('bg-red-500');
-                            statusClassList.add('bg-green-500');
-                            gameSocket.send(JSON.stringify({
-                                      type: 'join',
-                                      game_id: game_id
-                                    }));
-                          };
-                  gameSocket.onclose = function (event) {
-                            var statusClassList = document.getElementById('status').classList;
-                            statusClassList.remove('bg-green-500');
-                            statusClassList.add('bg-red-500');
+          gameSocket.onopen = function (event) {
+            gameSocket.send(JSON.stringify({
+              type: 'join',
+              game_id: game_id
+            }));
+          };
+          gameSocket.onclose = function (event) {
+            ReactDOM.render(React.createElement(GameBox, {
+              game: last_game,
+              onWordSubmit: onWordSubmit,
+              status: 'offline',
+              notify_message: 'Disconnected'}), document.getElementById('game_box')
+            )
+            setTimeout(function () {
+              gameSocket.removeAllListeners();
+              connect();
+            }, 1000);
+          }
+          gameSocket.onmessage = function (event) {
+            console.log(event.data);
+            var data = JSON.parse(event.data);
 
-                            setTimeout(function () {
-                                      // gameSocket.removeAllListeners();
-                                      connect();
-                                    }, 1000);
-                          }
-                  gameSocket.onmessage = function (event) {
-                            console.log(event.data);
-                            var data = JSON.parse(event.data);
+            var gameStatusElement = document.getElementById('game_status');
 
-                            var gameStatusElement = document.getElementById('game_status');
+            if(data.status == 'ok') {
+              last_game = data.message.game;
 
-                            if(data.status == 'ok') {
-                                      attempts = data.message.game.attempts;
+              ReactDOM.render(React.createElement(GameBox, {
+                game: data.message.game,
+                onWordSubmit: onWordSubmit,
+                status: 'online'}), document.getElementById('game_box'));
+            }else{
 
-                                      not_found_letters =
-                                        data.message.game.attempts.reduce(function (not_found_letters, attempt) {
-                                                  var attempt_word = attempt[0];
-                                                  var attempt_match = attempt[1];
+              ReactDOM.render(React.createElement(GameBox, {
+                game: last_game,
+                onWordSubmit: onWordSubmit,
+                status: (data.message == 'Word not found' ? 'online' : 'offline'),
+                notify_message: data.message}), document.getElementById('game_box'));
+            }
+          }
 
-                                                  var not_found_letters_in_word =
-                                                    attempt_match.reduce(function (not_found_letters, match, index) {
-                                                              if(match == 0) {
-                                                                        not_found_letters.push(attempt_word[index]);
-                                                                      }
-                                                              return not_found_letters;
-                                                            }, []); 
+          return gameSocket;
+        };
 
-                                                  not_found_letters = not_found_letters.concat(not_found_letters_in_word);
-                                                  return not_found_letters;
-                                                }, []);
+        var onWordSubmit = function(word) {
+          gameSocket.send(JSON.stringify({
+            game_id: game_id,
+            type: 'attempt',
+            word: word
+          }));
+        }
 
-                                      ReactDOM.render(
-                                                React.createElement(Keyboard,{
-                                                          rows: russian_keyboard,
-                                                          onKeyPress: handleKeyboardClick,
-                                                          marked_buttons: not_found_letters
-                                                        }),
-                                                document.getElementById('keyboard')
-                                              );
-                                      var gameStatus = data.message.game.status;
-                                      if (gameStatus == 'won') {
-                                                gameStatusElement.innerText = 'You win!';
-                                              } else if(gameStatus == 'lost') {
-                                                        gameStatusElement.innerText = 'You will definitely win next time!';
-                                                      } else {
-                                                                gameStatusElement.innerText = 'In progress...';
-                                                              }
-
-                                    } else {
-                                              current_word = '';
-                                              gameStatusElement.innerText = data.message;
-                                            }
-                            ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                          }
-
-                  return gameSocket;
-                };
+        ReactDOM.render(React.createElement(GameBox, {
+          game: last_game,
+          onWordSubmit: onWordSubmit,
+          status: 'offline'}), document.getElementById('game_box'));
 
         var gameSocket = connect();
 
-
-        var word_input = document.querySelector('body');
-        word_input.addEventListener('keyup', function (event) {
-                  if (event.keyCode === 13) {
-                            gameSocket.send(JSON.stringify({
-                                      game_id: game_id,
-                                      type: 'attempt',
-                                      word: current_word
-                                    }));
-                            current_word = '';
-                          } else if(event.keyCode === 8) {
-                                    current_word = current_word.slice(0, -1);
-                                    ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                                  }else{
-                                            var lowercased_key = event.key.toLowerCase();
-                                            if(current_word.length < 5 && lowercased_key.length == 1 && (lowercased_key.match(/[a-z]/g) || lowercased_key.match(/[а-я]/g))){
-                                                      current_word += lowercased_key;
-                                                      ReactDOM.render(React.createElement(Board, {attempts: attempts, current_word: current_word}), boardContainer);
-                                                    }
-                                          }
-                });
+        document.getElementById('game_id').value = location;
 
         var copy_input = document.getElementById('copy');
         copy_input.addEventListener('click', function (event) {
-                  document.getElementById('game_id').select();
-                  document.execCommand('copy');
-                });
+          document.getElementById('game_id').select();
+          document.execCommand('copy');
+        });
       </script>
-    <script>
-      ReactDOM.render(
-              React.createElement(Keyboard,{
-                            rows: russian_keyboard,
-                      onKeyPress: handleKeyboardClick
-                    }),
-              document.getElementById('keyboard')
-            );
-      </script>
-    </div>
   </body>
 </html>
 

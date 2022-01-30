@@ -70,7 +70,7 @@ class Board extends React.Component {
 
     return React.createElement(
       'div',
-      { className: 'grid grid-cols-5 gap-1' },
+      { className: 'grid grid-cols-5 gap-1 m-1' },
       attempt_items
     );
   }

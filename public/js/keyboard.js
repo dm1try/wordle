@@ -75,7 +75,7 @@ class Keyboard extends React.Component {
 
     return  React.createElement(
       'div',
-      { className: 'keyboard grid grid-rows-3 gap-1' },
+      { className: 'keyboard grid grid-rows-3 gap-1 my-1' },
       this.props.rows.map((row, index) => {
         return React.createElement(ButtonsRow, {
           key: index,
