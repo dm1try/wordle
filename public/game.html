@@ -57,8 +57,6 @@
             console.log(event.data);
             var data = JSON.parse(event.data);
 
-            var gameStatusElement = document.getElementById('game_status');
-
             if(data.status == 'ok') {
               last_game = data.message.game;
 
