@@ -1,6 +1,10 @@
 require_relative './app/game'
+require_relative './app/multiplayer_game'
 require_relative './app/game/dictionary/redis'
-$games = {}
+require_relative './app/controllers/simple_game'
+require_relative './app/controllers/multiplayer_game'
+
+$live_games = {}
 
 class App
   def self.build
@@ -13,57 +17,50 @@ class App
 
   def self.ws_handler(conn)
     while msg = JSON.parse(conn.recv)
-      response =
-        case msg["type"]
-        when "join"
-          game_id = msg["game_id"]
-
-          $publisher.subscribe(game_id, conn)
-
-          if $games[game_id]
-            {status: 'ok', message: {game: {status: $games[game_id].status, attempts: $games[game_id].attempts}}}
-          else
-            {status: 'error', message: 'Game not found'}
-          end
-        when "attempt"
-          game_id = msg["game_id"]
-
-          if game = $games[game_id]
-            begin
-              if game.word_available?(msg["word"])
-                game.attempt(msg["word"])
-                {status: 'ok', message: {game: {status: game.status, attempts: game.attempts}}}
-              else
-                {status: 'error', message: 'Word not found'}
-              end
-            rescue ArgumentError => e
-              {status: 'error', message: e.message}
-            end
-          else
-            {status: 'error', message: 'Game not found'}
-          end
-        end
-
-      conn.send(JSON.generate(response))
-      $publisher.publish(game_id, JSON.generate(response), conn)
+      if msg["channel"] == "multiplayer"
+        ::Controllers::MultiplayerGame.new(conn, msg).run
+      else
+        ::Controllers::SimpleGame.new(conn, msg).run
+      end
     end
   rescue => e
-   $publisher.unsubscribe(game_id, conn)
+#   $publisher.unsubscribe(game_id, conn)
     puts e
   end
 
   GAME_HTML = IO.read(File.join(__dir__, 'public/game.html'))
+  MULTIPLAYER_GAME_HTML = IO.read(File.join(__dir__, 'public/multiplayer_game.html'))
+
   def call(env)
+    # BUG: tipi does not forward query params
     req = Rack::Request.new(env)
+
     if req.path == '/new'
       game_id = SecureRandom.uuid
       game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
-      $games[game_id] = Game.new(game_dictionary)
+      $live_games[game_id] = Game.new(game_dictionary)
+
       [302, {'Location' => "/games/#{game_id}"}, []]
-    elsif req.path.match?(/games\/(.*)/)
-      [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
+    elsif req.path == '/new_multiplayer'
+      game_id = SecureRandom.uuid
+
+      game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
+      $live_games[game_id] = MultiplayerGame.new(game_dictionary)
+
+      [302, {'Location' => "/games/#{game_id}"}, []]
+    elsif req.path.match(/games\/(.*)/)
+      game_id = $1
+
+      case $live_games[game_id]
+      when Game
+        [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
+      when MultiplayerGame
+        [200, {'Content-Type' => 'text/html'}, [MULTIPLAYER_GAME_HTML]]
+      else
+        [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
+      end
     else
-      [404, {'Content-Type' => 'text/html'}, ['Not Found']]
+      [404, {'Content-Type' => 'text/html'}, []]
     end
   end
 end

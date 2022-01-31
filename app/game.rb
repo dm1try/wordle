@@ -6,11 +6,11 @@ class Game
 
   attr_reader :word, :attempts, :status
 
-  def initialize(dictionary)
+  def initialize(dictionary, word = nil)
     @dictionary = dictionary
     @attempts = []
     @status = :in_progress
-    @word = @dictionary.random_target_word
+    @word = word || @dictionary.random_target_word
   end
 
   def word_available?(word)
@@ -51,6 +51,10 @@ class Game
     end
 
     result
+  end
+
+  def last_match
+    @attempts.last[1]
   end
 end
 

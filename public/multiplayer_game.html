@@ -11,9 +11,16 @@
   <body>
     <script src="/js/game_box.js"></script>
     <script src="/js/keyboard.js"></script>
+    <script src="/js/players_list.js"></script>
 
     <div class="flex flex-col justify-center items-center font-sans m-4">
-      <div id="game_box"></div>
+      <div class="flex flex-col">
+        <div id="game_box"></div>
+        <div class="flex">
+          <div id="players_list"></div>
+          <button id="start_game" class="rounded bg-green-500 text-gray-100 border mx-2 px-2">GO!</button>
+        </div>
+      </div>
       <div class="my-2 w-full max-w-sm">
         <label class="inline-block text" for="game_id">Play together:</label>
         <div class="my-2 flex">
@@ -32,10 +39,18 @@
         var game_id = location.pathname.split('/')[2];
         var state = {
           game_id: game_id,
+          player_id: null,
           game: {attempts: [], status: 'in_progress'},
           status: 'offline',
           notify: '',
+          players: [],
+          start_game_time: null,
+          end_game_time: null,
         };
+
+        function get_player_by_id(id) {
+          return state.players.find(player => player.id == id);
+        }
 
         var connect = function () {
           var gameSocket = new WebSocket("ws://" + location.host);
@@ -44,7 +59,7 @@
             gameSocket.send(JSON.stringify({
               type: 'join',
               game_id: game_id,
-              channel: 'game'
+              channel: 'multiplayer'
             }));
           };
 
@@ -56,6 +71,7 @@
               notify_message: 'Disconnected'}), document.getElementById('game_box')
             )
             setTimeout(function () {
+              // gameSocket.removeAllListeners();
               connect();
             }, 1000);
           }
@@ -65,10 +81,10 @@
             var payload = JSON.parse(event.data);
 
             if(payload.status == 'ok') {
-              if(payload.type == 'join'){
-                state.status = 'online';
-                state.game = payload.data.game;
-              }else if(payload.type == 'attempt'){
+              if(payload.type == "join") {
+                state.players =  payload.data.players;
+                state.player_id = payload.data.player_id;
+              }else if(payload.type == "attempt") {
                  if(payload.data.attempt_result == 'word_found'){
                   state.game = payload.data.game;
                   state.notify = 'Go on!';
@@ -81,18 +97,43 @@
                   state.game = payload.data.game;
                   state.notify = 'You will definitely win next time!';
                 }
-             }
-            }else if(payload.notify_type == 'game_updated'){
-              state.game = payload.data.game;
-              state.notify = 'Someone has added the word!';
+              }
+            }else if(payload.notify_type == 'game_started') {
+              state.notify = 'Game has started!';
+              state.start_game_time = Date.parse(payload.data.start_time);
+              document.getElementById('start_game').hidden = true;
+            }else if(payload.notify_type == 'game_ended') {
+              var player = get_player_by_id(payload.data.winner_id);
+              state.end_game_time = Date.parse(payload.data.end_time);
+              var duration = (state.end_game_time - state.start_game_time) / 1000;
+              state.notify = 'Game ended in ' + duration + ' seconds! Winner: ' + player.name + '!!!';
+              state.winner_id = player.id;
+            }else if(payload.notify_type == 'player_joined'){
+              state.players.push(payload.data.player);
+            }else if(payload.notify_type == 'player_ended_game'){
+              var player = get_player_by_id(payload.data.player_id);
+              player["last_match"] = payload.data.match;
+
+              state.notify = player.name + ' has ended the game!';
+            } else if(payload.notify_type == 'player_found_word') {
+              var player = get_player_by_id(payload.data.player_id);
+              player["last_match"] = payload.data.match
+              state.notify = player.name + ' entered a word!';
             }else if(payload.status == 'error'){
               state.notify = payload.data.message;
             }
-            ReactDOM.render(React.createElement(GameBox, {
-                      game: state.game,
-                      onWordSubmit: onWordSubmit,
-                      status: state.status,
-                      notify_message: state.notify}), document.getElementById('game_box'));
+
+              ReactDOM.render(React.createElement(GameBox, {
+                        game: state.game,
+                        onWordSubmit: onWordSubmit,
+                        status: 'online',
+                        notify_message: state.notify}), document.getElementById('game_box'));
+
+              ReactDOM.render(React.createElement(PlayersList, {
+                players: state.players,
+                winner_id: state.winner_id,
+                current_player_id: state.player_id,
+              }), document.getElementById('players_list'))
           }
 
           return gameSocket;
@@ -100,17 +141,31 @@
 
         var onWordSubmit = function(word) {
           gameSocket.send(JSON.stringify({
-            game_id: game_id,
+            channel: 'multiplayer',
+            player_id: state.player_id,
+            game_id: state.game_id,
             type: 'attempt',
-            word: word,
-            channel: 'game'
+            word: word
           }));
         }
+
+        document.getElementById('start_game').addEventListener('click', function () {
+          gameSocket.send(JSON.stringify({
+            channel: 'multiplayer',
+            player_id: state.player_id,
+            game_id: state.game_id,
+            type: 'start'
+          }));
+        });
 
         ReactDOM.render(React.createElement(GameBox, {
           game: state.game,
           onWordSubmit: onWordSubmit,
           status: 'offline'}), document.getElementById('game_box'));
+
+        ReactDOM.render(React.createElement(PlayersList, {
+                  players: state.players,
+                }), document.getElementById('players_list'))
 
         var gameSocket = connect();
 

@@ -9,7 +9,10 @@ class GameUpdatesPublisher
   def run
     spin do
       loop do
-        game_id, message, initiator = @updates.pop
+        game_id, type, payload, initiator = @updates.pop
+
+        message = message(type, payload)
+
         puts "PUBLISHING: #{game_id} #{message}\n"
 
         if @connections[game_id].nil?
@@ -40,7 +43,12 @@ class GameUpdatesPublisher
     @connections[game_id].delete(connection)
   end
 
-  def publish(game_id, update, initiator = nil)
-    @updates.push([game_id, update, initiator])
+  def publish(game_id, type, payload, initiator = nil)
+    @updates.push([game_id, type, payload, initiator])
+  end
+
+  def message(type, payload)
+    data = {notify_type: type, data: payload}
+    JSON.generate(data)
   end
 end
