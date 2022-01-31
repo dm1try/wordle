@@ -10,13 +10,4 @@ opts = {
 }
 
 port = ENV['PORT'] || 1234
-
-server = spin do
-  Tipi.serve('0.0.0.0', port, opts, &app)
-end
-
-supervise(server, restart: :on_error) do |server, exception|
-  puts 'Server is down, restarting...'
-  puts "Error message: #{exception.message}"
-  server.restart
-end
+Tipi.serve('0.0.0.0', port, opts, &app)
