@@ -41,12 +41,22 @@ class Game
 
   def compare_word(word)
     result = [0, 0, 0, 0, 0]
+    possible_partial_matches = []
+    not_matched_positions = []
 
     for i in 0...5
       if word[i] == @word[i]
         result[i] = LETTER_IN_CORRECT_POSITION
-      elsif @word.include?(word[i])
-        result[i] = LETTER_IN_WRONG_POSITION
+      else
+        possible_partial_matches << @word[i]
+        not_matched_positions << i
+      end
+    end
+
+    not_matched_positions.each do |position|
+      if index = possible_partial_matches.index(word[position])
+        result[position] = LETTER_IN_WRONG_POSITION
+        possible_partial_matches.delete_at(index)
       end
     end
 

@@ -35,6 +35,25 @@ describe Game do
     it 'returns a partial match result' do
       expect(subject.attempt("nialp")).to eq([1, 1, 2, 1, 1])
     end
+
+    it 'does not match for the same letter twice' do
+      expect(subject.attempt("plaia")).to eq([2, 2, 2, 2, 0])
+      expect(subject.attempt("alain")).to eq([0, 2, 2, 2, 2])
+      expect(subject.attempt("aliin")).to eq([1, 2, 0, 2, 2])
+      expect(subject.attempt("aliia")).to eq([1, 2, 0, 2, 0])
+      expect(subject.attempt("aaiia")).to eq([1, 0, 0, 2, 0])
+    end
+  end
+
+  context 'word with the same letters in different positions' do
+    subject { described_class.new(::Game::Dictionary::Test.new(["banaa"], [])) }
+
+    it 'does a partial matching properly' do
+      expect(subject.attempt("aanan")).to eq([1, 2, 2, 2, 0])
+      expect(subject.attempt("aonan")).to eq([1, 0, 2, 2, 0])
+      expect(subject.attempt("banan")).to eq([2, 2, 2, 2, 0])
+      expect(subject.attempt("banaa")).to eq([2, 2, 2, 2, 2])
+    end
   end
 
   it 'returns all attempts' do
