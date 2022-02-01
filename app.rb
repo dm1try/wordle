@@ -1,20 +1,22 @@
+require 'bundler/setup'
+require 'tipi'
+require 'tipi/websocket'
+
 require_relative './app/game'
 require_relative './app/multiplayer_game'
 require_relative './app/game/dictionary/redis'
 require_relative './app/controllers/simple_game'
 require_relative './app/controllers/multiplayer_game'
 
+
+require_relative './db'
+require_relative './app/game_updates_publisher'
+
 $live_games = {}
+$publisher = GameUpdatesPublisher.new
+$publisher.run
 
 class App
-  def self.build
-    Rack::Builder.new do
-      use Rack::Static, :urls => ["/js", "/css"], :root => "public"
-      use Rack::Static, :urls => {"/" => "new.html"}, :root => "public"
-      run App.new
-    end
-  end
-
   def self.ws_handler(conn)
     while msg = JSON.parse(conn.recv)
       if msg["channel"] == "multiplayer"
@@ -28,39 +30,59 @@ class App
     puts e
   end
 
-  GAME_HTML = IO.read(File.join(__dir__, 'public/game.html'))
-  MULTIPLAYER_GAME_HTML = IO.read(File.join(__dir__, 'public/multiplayer_game.html'))
+  GAME_HTML_PATH = File.join(__dir__, 'public', 'game.html')
+  MULTIPLAYER_GAME_HTML_PATH = File.join(__dir__, 'public', 'multiplayer_game.html')
 
-  def call(env)
-    # BUG: tipi does not forward query params
-    req = Rack::Request.new(env)
+  def self.tipi_app
+    Tipi.route do |r|
 
-    if req.path == '/new'
-      game_id = SecureRandom.uuid
-      game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
-      $live_games[game_id] = Game.new(game_dictionary)
-
-      [302, {'Location' => "/games/#{game_id}"}, []]
-    elsif req.path == '/new_multiplayer'
-      game_id = SecureRandom.uuid
-
-      game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
-      $live_games[game_id] = MultiplayerGame.new(game_dictionary)
-
-      [302, {'Location' => "/games/#{game_id}"}, []]
-    elsif req.path.match(/games\/(.*)/)
-      game_id = $1
-
-      case $live_games[game_id]
-      when Game
-        [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
-      when MultiplayerGame
-        [200, {'Content-Type' => 'text/html'}, [MULTIPLAYER_GAME_HTML]]
-      else
-        [200, {'Content-Type' => 'text/html'}, [GAME_HTML]]
+      r.on_root do
+        r.serve_file File.join(__dir__, 'public', 'new.html')
       end
-    else
-      [404, {'Content-Type' => 'text/html'}, []]
+
+      r.on 'js' do
+        r.serve_file File.join(__dir__, 'public', r.path)
+      end
+
+      r.on 'new' do
+        game_id = SecureRandom.uuid
+        game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
+
+        $live_games[game_id] =
+          if r.query[:mode] == 'time_competition'
+            MultiplayerGame.new(game_dictionary)
+          else
+            Game.new(game_dictionary)
+          end
+
+        r.redirect "/games/#{game_id}"
+      end
+
+      r.on 'games' do
+        game_id = r.path.split('/').last
+
+        case $live_games[game_id]
+        when Game
+          r.serve_file GAME_HTML_PATH
+        when MultiplayerGame
+          r.serve_file MULTIPLAYER_GAME_HTML_PATH
+        else
+          r.redirect '/'
+        end
+      end
+
+      r.respond("Not Found", {'Content-Type' => 'text/plain', ':status' => 404})
     end
   end
 end
+
+opts = {
+  reuse_addr:  true,
+  dont_linger: true,
+  upgrade:     {
+    websocket: Tipi::Websocket.handler(&App.method(:ws_handler))
+  }
+}
+
+port = ENV['PORT'] || 1234
+Tipi.serve('0.0.0.0', port, opts, &App.tipi_app)
