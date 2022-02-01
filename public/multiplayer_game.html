@@ -101,7 +101,6 @@
             }else if(payload.notify_type == 'game_started') {
               state.notify = 'Game has started!';
               state.start_game_time = Date.parse(payload.data.start_time);
-              document.getElementById('start_game').hidden = true;
             }else if(payload.notify_type == 'game_ended') {
               var player = get_player_by_id(payload.data.winner_id);
               state.end_game_time = Date.parse(payload.data.end_time);
