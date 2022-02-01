@@ -13,7 +13,7 @@ set :application_name, 'wordle'
 set :domain, 'wordle.dmitry.it'
 set :deploy_to, '/home/deploy/wordle'
 set :repository, 'https://github.com/dm1try/wordle.git'
-set :branch, 'main'
+set :branch, 'prod'
 
 # Optional settings:
 set :user, 'deploy'          # Username in the server to SSH to.
