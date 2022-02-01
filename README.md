@@ -7,4 +7,4 @@ The faster one wins.
 
 ## Demo
 
-http://wordle.dmitry.it (only russian worlds atm)
+http://wordle.dmitry.it
