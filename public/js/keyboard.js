@@ -42,6 +42,8 @@ class ButtonsRow extends React.Component {
   render() {
     return (
       React.createElement("div", {
+        // Trick tailwind css builder so will add this classes to the prod build
+        // grid-cols-9 grid-cols-10 grid-cols-11 grid-cols-12
         className: "row text-center grid grid-cols-" + this.props.buttons.length + " gap-1"
       },
         this.props.buttons.map((button, index) => {
