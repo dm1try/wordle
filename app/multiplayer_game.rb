@@ -22,6 +22,10 @@ class MultiplayerGame
     @players.delete_if { |player| player.id == id }
   end
 
+  def player_exists?(id)
+    @players.any? { |player| player.id == id }
+  end
+
   def start
     puts "Game started at #{@start_time}"
     puts "Players: #{@players.join(', ')}"
@@ -64,6 +68,10 @@ class MultiplayerGame
     end
 
     game
+  end
+
+  def player_game(player_id)
+    @games[player_id]
   end
 
   def word_available?(word)

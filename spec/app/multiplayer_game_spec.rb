@@ -31,6 +31,13 @@ describe MultiplayerGame do
     end
   end
 
+  describe '#player_exists?' do
+    it 'checks if a player is in a game' do
+      game.add_player(1, 'player1')
+      expect(game.player_exists?(1)).to eq(true)
+    end
+  end
+
   describe '#attempt' do
     it 'returns board game' do
       game.add_player(1, 'player1')
