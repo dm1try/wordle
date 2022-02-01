@@ -12,41 +12,55 @@
     <script src="/js/game_box.js"></script>
     <script src="/js/keyboard.js"></script>
     <script src="/js/players_list.js"></script>
+    <script src="/js/multiplayer_control.js"></script>
 
     <div class="flex flex-col justify-center items-center font-sans m-4">
-      <div class="flex flex-col">
+      <div class="flex flex-col px-1 py-1">
         <div id="game_box"></div>
         <div class="flex">
           <div id="players_list"></div>
-          <button id="start_game" class="rounded bg-green-500 text-gray-100 border mx-2 px-2">GO!</button>
+          <div id="start_game" class="flex"></div>
         </div>
       </div>
-      <div class="my-2 w-full max-w-sm">
-        <label class="inline-block text" for="game_id">Play together:</label>
-        <div class="my-2 flex">
-          <input class="flex-1 rounded border text-ellipsis" id="game_id" readonly></input>
-          <button id="copy" class="rounded border px-1 py-1 bg-blue-600 text-gray-50" >Copy</button>
+      <div class="flex flex-col m-2 max-w-sm w-full">
+        <div class="my-2 w-full max-w-sm">
+          <div class="my-2 flex">
+            <input class="flex-1 rounded border text-ellipsis" id="game_id" readonly></input>
+            <button id="copy" class="rounded border px-1 py-1 bg-blue-600 text-gray-50" >Copy game link</button>
+          </div>
         </div>
+        <form action="/new" method="get" class="bg-transparent flex justify-center">
+          <input name="mode" hidden value="time_competition"/>
+          <button class="inline-flex items-center px-1 py-1 border border-transparent text-base rounded text-gray-50 bg-green-600 hover:bg-green-700">
+            New 🏁
+          </button>
+        </form>
       </div>
-      <form action="/new_multiplayer" method="post" class="bg-transparent flex justify-center">
-        <button class="inline-flex items-center px-3 py-1 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
-          Start a new multiplayer game
-        </button>
-      </form>
     </div>
       <script src="/js/board.js"></script>
       <script>
         var game_id = location.pathname.split('/')[2];
-        var state = {
-          game_id: game_id,
-          player_id: null,
-          game: {attempts: [], status: 'in_progress'},
-          status: 'offline',
-          notify: '',
-          players: [],
-          start_game_time: null,
-          end_game_time: null,
+        var saved_state = localStorage.getItem(game_id);
+
+        var state = null;
+        if(saved_state) {
+          state = JSON.parse(saved_state);
+        }else {
+          state = {
+            game_id: game_id,
+            player_id: null,
+            game: {attempts: [], status: 'in_progress'},
+            status: 'offline',
+            notify: '',
+            players: [],
+            start_game_time: null,
+            end_game_time: null,
+          }
         };
+
+        function save_state() {
+          localStorage.setItem(game_id, JSON.stringify(state));
+        }
 
         function get_player_by_id(id) {
           return state.players.find(player => player.id == id);
@@ -59,6 +73,7 @@
             gameSocket.send(JSON.stringify({
               type: 'join',
               game_id: game_id,
+              player_id: state.player_id,
               channel: 'multiplayer'
             }));
           };
@@ -70,6 +85,9 @@
               status: 'offline',
               notify_message: 'Disconnected'}), document.getElementById('game_box')
             )
+
+            save_state();
+
             setTimeout(function () {
               // gameSocket.removeAllListeners();
               connect();
@@ -133,6 +151,11 @@
                 winner_id: state.winner_id,
                 current_player_id: state.player_id,
               }), document.getElementById('players_list'))
+
+              ReactDOM.render(React.createElement(MultiplayerControl, {
+                        onClick: onStartGame,
+                        started_at: state.start_game_time}), document.getElementById('start_game'));
+            save_state();
           }
 
           return gameSocket;
@@ -148,14 +171,14 @@
           }));
         }
 
-        document.getElementById('start_game').addEventListener('click', function () {
+        var onStartGame = function() {
           gameSocket.send(JSON.stringify({
             channel: 'multiplayer',
             player_id: state.player_id,
             game_id: state.game_id,
             type: 'start'
           }));
-        });
+        }
 
         ReactDOM.render(React.createElement(GameBox, {
           game: state.game,
@@ -165,6 +188,10 @@
         ReactDOM.render(React.createElement(PlayersList, {
                   players: state.players,
                 }), document.getElementById('players_list'))
+
+        ReactDOM.render(React.createElement(MultiplayerControl, {
+                  onClick: onStartGame,
+                  started_at: state.start_game_time}), document.getElementById('start_game'));
 
         var gameSocket = connect();
 

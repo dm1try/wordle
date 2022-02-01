@@ -5,15 +5,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="flex flex-col justify-center items-center">
+    <h1 class="text-8xl m-10">Wordle</h1>
     <div class="max-w-sm w-full">
-      <form action="/new" method="post" class="bg-transparent flex justify-center">
+      <form action="/new" method="get" class="bg-transparent flex justify-center">
+        <select name="mode" class="appearance-none mx-2 px-2 border rounder  bg-amber-100 hover:bg-amber-200">
+          <option value="coop">Cooperative Mode 🤝</option>
+          <option selected value="time_competition">Competition Mode 🏁</option>
+        </select>
         <button class="inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
-          Start a new co-op game
-        </button>
-      </form>
-      <form action="/new_multiplayer" method="post" class="bg-transparent flex justify-center">
-        <button class="inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
-          Start a new multiplayer game
+          Start
         </button>
       </form>
     </div>

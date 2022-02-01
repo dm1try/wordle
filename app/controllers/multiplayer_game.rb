@@ -8,14 +8,19 @@ module Controllers
       game = $live_games[game_id]
 
       return error(:game_not_found) unless game
-      return error(:game_already_started) if game.started?
 
-      player_id = SecureRandom.uuid
-      player_name = "Wordler #{game.players.size + 1}"
-      game.add_player(player_id, player_name)
+      player_id = message["player_id"]
 
+      unless game.player_exists?(player_id)
+        return error(:game_already_started) if game.started?
+
+        player_id = SecureRandom.uuid
+        player_name = "Wordler #{game.players.size + 1}"
+        game.add_player(player_id, player_name)
+
+        $publisher.publish(game_id, :player_joined, {player: {id: player_id, name: player_name}}, conn)
+      end
       $publisher.subscribe(game_id, conn)
-      $publisher.publish(game_id, :player_joined, {player: {id: player_id, name: player_name}}, conn)
 
       players = game.players.map { |p| {id: p.id, name: p.name} }
       ok(player_id: player_id, players: players)

@@ -14,17 +14,20 @@ describe "Wordle", type: :feature do
     Process.kill("TERM", @server_pid)
   end
 
-  it "allows to play a new game and win :)" do
-    visit '/'
-    expect(page).to have_content 'Start a new co-op game'
+  context 'cooperative mode' do
+    it "allows to play a new game and win :)" do
+      visit '/'
+      expect(page).to have_content 'Start'
 
-    find("button", :text => "Start a new co-op game").click
-    expect(page).to have_content 'WORDLE'
+      select "Cooperative Mode 🤝", :from => "mode"
+      find("button", :text => "Start").click
+      expect(page).to have_content 'WORDLE'
 
-    find("body").send_keys("plain\n")
+      find("body").send_keys("plain\n")
 
-    expect(page).to have_content "P\nL\nA\nI\nN\n"
-    expect(page).to have_content "You win!"
+      expect(page).to have_content "P\nL\nA\nI\nN\n"
+      expect(page).to have_content "You win!"
+    end
   end
 
   context 'multiplayer mode' do
@@ -32,9 +35,10 @@ describe "Wordle", type: :feature do
     it 'allows to do the competion between players' do
       Capybara.using_session('player1') do
         visit '/'
-        expect(page).to have_content 'Start a new multiplayer game'
+        expect(page).to have_content 'Start'
 
-        find("button", :text => "Start a new multiplayer game").click
+        select "Competition Mode 🏁", :from => "mode"
+        find("button", :text => "Start").click
         expect(page).to have_content 'WORDLE'
         @game_url = page.current_url
       end
@@ -45,7 +49,7 @@ describe "Wordle", type: :feature do
       end
 
       Capybara.using_session('player1') do
-        find("#start_game").click
+        find("button", :text => "Go").click
         find("body").send_keys("ololo\n")
 
         expect(page).to have_content "not found"
