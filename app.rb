@@ -44,6 +44,10 @@ class App
         r.serve_file File.join(__dir__, 'public', r.path)
       end
 
+      r.on 'css' do
+        r.serve_file File.join(__dir__, 'public', r.path)
+      end
+
       r.on 'new' do
         game_id = SecureRandom.uuid
 
