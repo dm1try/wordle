@@ -29,7 +29,7 @@ class Button extends React.Component {
 
     return (
       React.createElement("button", {
-        className: bgColorClass + " border text-2xl rounded px-1 py-1 " + textColorClass,
+        className: bgColorClass + " border text-2xl rounded py-1 " + textColorClass,
         onMouseDown: this.onMouseDown.bind(this),
         onMouseUp: this.onMouseUp.bind(this),
       },
