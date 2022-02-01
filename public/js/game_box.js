@@ -42,6 +42,16 @@ const russian_keyboard_layout = [
   ]
 ];
 
+const english_keyboard_layout = [
+  ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+  ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+  [
+    {code: 'backspace', display: '⌫', color: 'red'},
+    'z', 'x', 'c', 'v', 'b', 'n', 'm',
+    { code: 'enter', display: '⏎', color: 'green' }
+  ]
+];
+
 class GameBox extends React.Component {
   constructor(props){
     super(props);
@@ -120,6 +130,14 @@ class GameBox extends React.Component {
     }
   }
 
+  keyboardLayout(){
+    if (this.props.game_language == 'ru') {
+      return russian_keyboard_layout;
+    } else {
+      return english_keyboard_layout;
+    }
+  }
+
   render() {
     return React.createElement('div', {
       className: 'max-w-sm w-full'
@@ -136,7 +154,8 @@ class GameBox extends React.Component {
         message: this.props.notify_message || this.statusDescription()
       }),
       React.createElement(Keyboard, {
-        rows: russian_keyboard_layout,
+        rows: this.keyboardLayout(),
+        language: this.props.game_language,
         marked_buttons: this.notFoundLetters(),
         onKeyPress: this.handleCustomKeyboardPress.bind(this)
       }));

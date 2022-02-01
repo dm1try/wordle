@@ -31,7 +31,8 @@ describe Controllers::MultiplayerGame do
 
     context 'when the game is found' do
       let(:message) { { 'type' => 'join', 'game_id' => 'game_id', 'channel' => 'test'} }
-      let(:game) { instance_double(MultiplayerGame, add_player: nil, players: [], started?: false, player_exists?: false) }
+      let(:game) { instance_double(MultiplayerGame, add_player: nil, players: [],
+                                   started?: false, player_exists?: false, dictionary: double(name: 'en')) }
       let(:fake_player_id) { 'fake_uuid' }
 
       before do
@@ -48,7 +49,7 @@ describe Controllers::MultiplayerGame do
         expect(connection).to have_received(:send).with({
           status: 'ok',
           type: :join,
-          data: {player_id: fake_player_id, players: []},
+          data: {player_id: fake_player_id, players: [], dictionary_name: 'en'},
           channel: 'test'
         }.to_json)
       end
@@ -67,7 +68,7 @@ describe Controllers::MultiplayerGame do
           expect(connection).to have_received(:send).with({
             status: 'ok',
             type: :join,
-            data: {player_id: existing_player_id, players: []},
+            data: {player_id: existing_player_id, players: [], dictionary_name: 'en'},
             channel: 'test'
           }.to_json)
         end

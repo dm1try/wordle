@@ -56,6 +56,7 @@
             players: [],
             start_game_time: null,
             end_game_time: null,
+            dictionary_name: "en"
           }
         };
 
@@ -83,6 +84,7 @@
             ReactDOM.render(React.createElement(GameBox, {
               game: state.game,
               onWordSubmit: onWordSubmit,
+              game_language: state.dictionary_name,
               status: 'offline',
               notify_message: 'Disconnected'}), document.getElementById('game_box')
             )
@@ -105,7 +107,7 @@
                 state.player_id = payload.data.player_id;
                 state.dictionary_name = payload.data.dictionary_name;
                 // TODO: use server side rendering
-                document.getElementsByName("dictionary")[0].value = state.dictionary_name;
+                document.getElementsByName("dictionary")[0].setAttribute('value', state.dictionary_name);
               }else if(payload.type == "attempt") {
                  if(payload.data.attempt_result == 'word_found'){
                   state.game = payload.data.game;
@@ -148,6 +150,7 @@
                         game: state.game,
                         onWordSubmit: onWordSubmit,
                         status: 'online',
+                        game_language: state.dictionary_name,
                         notify_message: state.notify}), document.getElementById('game_box'));
 
               ReactDOM.render(React.createElement(PlayersList, {
@@ -187,6 +190,7 @@
         ReactDOM.render(React.createElement(GameBox, {
           game: state.game,
           onWordSubmit: onWordSubmit,
+          game_language: state.dictionary_name,
           status: 'offline'}), document.getElementById('game_box'));
 
         ReactDOM.render(React.createElement(PlayersList, {
