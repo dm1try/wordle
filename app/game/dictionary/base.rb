@@ -1,6 +1,8 @@
 class Game
   module Dictionary
     class Base
+      attr_reader :name
+
       def available_words
         raise 'not implemented'
       end

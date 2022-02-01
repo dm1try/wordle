@@ -46,7 +46,19 @@ class App
 
       r.on 'new' do
         game_id = SecureRandom.uuid
-        game_dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words')
+
+        guesses_set_name = 'words'
+        available_words_set_name = 'available_words'
+        dictionary_name = 'ru'
+
+        if r.query[:dictionary] == 'en'
+          guesses_set_name = 'words_en'
+          available_words_set_name = 'available_words_en'
+          dictionary_name = 'en'
+        end
+
+        game_dictionary = Game::Dictionary::Redis.new($redis, guesses_set_name,
+                                                      available_words_set_name, dictionary_name)
 
         $live_games[game_id] =
           if r.query[:mode] == 'time_competition'

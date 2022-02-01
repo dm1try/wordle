@@ -31,6 +31,7 @@
         </div>
         <form action="/new" method="get" class="bg-transparent flex justify-center">
           <input name="mode" hidden value="time_competition"/>
+          <input name="dictionary" hidden value="en"/>
           <button class="inline-flex items-center px-1 py-1 border border-transparent text-base rounded text-gray-50 bg-green-600 hover:bg-green-700">
             New 🏁
           </button>
@@ -102,6 +103,9 @@
               if(payload.type == "join") {
                 state.players =  payload.data.players;
                 state.player_id = payload.data.player_id;
+                state.dictionary_name = payload.data.dictionary_name;
+                // TODO: use server side rendering
+                document.getElementsByName("dictionary")[0].value = state.dictionary_name;
               }else if(payload.type == "attempt") {
                  if(payload.data.attempt_result == 'word_found'){
                   state.game = payload.data.game;

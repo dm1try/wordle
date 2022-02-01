@@ -3,10 +3,11 @@ require_relative 'base'
 class Game
   module Dictionary
     class Redis < Base
-      def initialize(redis, target_words_set_name, available_words_set_name)
+      def initialize(redis, target_words_set_name, available_words_set_name, name = "default")
         @redis = redis
         @target_words_set_name = target_words_set_name
         @available_words_set_name = available_words_set_name
+        @name = name
       end
 
       def target_words
