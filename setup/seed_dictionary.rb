@@ -15,7 +15,7 @@ doc.text.each_line do |line|
   words = line.split
   words.each do |word|
     word.chomp!
-    found_words << word.downcase if word.length == 5
+    found_words << word.downcase if word.length == 5 && word.match(/^[а-яёa-z]+$/)
   end
 end
 
