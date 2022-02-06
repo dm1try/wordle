@@ -29,7 +29,7 @@ class MultiplayerGame
   def start
     puts "Game started at #{@start_time}"
     puts "Players: #{@players.join(', ')}"
-    puts "Dictionary: #{@dictionary}"
+    puts "Dictionary name: #{@dictionary.name}"
 
     @start_time = Time.now
     target_word = @dictionary.random_target_word

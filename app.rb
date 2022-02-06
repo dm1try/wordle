@@ -18,7 +18,10 @@ $publisher.run
 
 class App
   def self.ws_handler(conn)
-    while msg = JSON.parse(conn.recv)
+    while data = conn.recv
+      break if data.nil? || data.empty?
+      msg = JSON.parse(data)
+
       if msg["channel"] == "multiplayer"
         ::Controllers::MultiplayerGame.new(conn, msg).run
       else
