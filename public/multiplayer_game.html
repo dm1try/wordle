@@ -163,7 +163,17 @@
               add_player_match(player, payload.data.match);
               state.notify = player.name + ' entered a word!';
             }else if(payload.status == 'error'){
-              state.notify = payload.data.message;
+              if(payload.data.error == 'game_not_started'){
+                state.notify = {
+                  message: 'Game has not started yet! Click',
+                  button: {
+                    text: 'Go!',
+                    onClick: onStartGame
+                  }
+                }
+              }else{
+                state.notify = payload.data.message;
+              }
             }
 
               ReactDOM.render(React.createElement(GameBox, {
