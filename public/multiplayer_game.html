@@ -220,10 +220,6 @@
           game_language: state.dictionary_name,
           status: 'offline'}), document.getElementById('game_box'));
 
-        ReactDOM.render(React.createElement(PlayersList, {
-                  players: state.players,
-                }), document.getElementById('players_list'))
-
         var gameSocket = connect();
 
         document.getElementById('game_id').value = location;
