@@ -27,7 +27,7 @@ class NotifyBox extends React.Component {
     }
 
     return React.createElement('div', {
-      className: "m-2 border px-4 py-3 rounded relative text-center",
+      className: "m-2 border px-4 py-3 rounded relative text-center animation-shake",
       role: "alert"
     },
       content
@@ -168,7 +168,7 @@ class GameBox extends React.Component {
         status: this.props.status,
       }),
       React.createElement(Board, {
-        attempts: this.props.game.attempts,
+        game: this.props.game,
         current_word: this.state.currentWord,
         onClick: this.props.onClick
       }),

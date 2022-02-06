@@ -44,9 +44,15 @@ class GamePreview extends React.Component {
 class OnlinePlayer extends React.Component {
   render() {
 
+    var className = 'flex flex-col items-center';
+
+    if(this.props.winner){
+      className += ' animation-win';
+    }
+
     return React.createElement(
       'div',
-      { className: 'flex flex-col items-center' },
+      { className: className },
       React.createElement(
         'div',
         {},
@@ -73,7 +79,7 @@ class PlayersList extends React.Component {
 
       competitors.map((player, index) =>
         React.createElement(OnlinePlayer,
-          { key: index, name: player.name, attempts: player.attempts }
+          { key: index, name: player.name, attempts: player.attempts, winner: player.id == this.props.winner_id }
         )
       )
     )

@@ -12,6 +12,10 @@ class WordLetter extends React.Component {
       className += ' border-2';
     }
 
+    if(this.props.pressed) {
+      className += ' animation-press'
+    }
+
     return  React.createElement(
       'div',
       { className: className},
@@ -22,10 +26,12 @@ class WordLetter extends React.Component {
 
 class WordGuess extends React.Component {
   render() {
+    var word_len = this.props.word.length;
+
     var letters = this.props.word.split('').map((letter, index) => {
       return    React.createElement(
         WordLetter,
-        { key: index, letter: letter, match: this.props.matches[index] }
+        { key: index, letter: letter, match: this.props.matches[index], pressed: (index == word_len - 1) }
       )
     });
 
@@ -42,7 +48,7 @@ class WordGuess extends React.Component {
 
 class Board extends React.Component {
   render() {
-    var attempt_items = this.props.attempts.map((attempt, index) => {
+    var attempt_items = this.props.game.attempts.map((attempt, index) => {
       var word = attempt[0];
       var matches = attempt[1];
 
@@ -60,7 +66,7 @@ class Board extends React.Component {
       ));
     }
 
-    for(var i = 0; i < (5 - this.props.attempts.length); i++) {
+    for(var i = 0; i < (5 - this.props.game.attempts.length); i++) {
       attempt_items.push(React.createElement(
         WordGuess,
         { key: i + 10, word: '', matches: [] }
@@ -68,9 +74,15 @@ class Board extends React.Component {
       );
     }
 
+    var className = 'grid grid-cols-5 gap-1 m-1'
+
+    if(this.props.game.status == 'won') {
+      className += ' animation-win'
+    }
+
     return React.createElement(
       'div',
-      { className: 'grid grid-cols-5 gap-1 m-1' },
+      { className: className },
       attempt_items
     );
   }
