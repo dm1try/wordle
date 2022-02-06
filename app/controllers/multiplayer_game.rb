@@ -22,7 +22,7 @@ module Controllers
       end
       $publisher.subscribe(game_id, conn)
 
-      players = game.players.map { |p| {id: p.id, name: p.name} }
+      players = game.players.map { |p| {id: p.id, name: p.name, attempts: p.attempts} }
       ok(player_id: player_id, players: players, dictionary_name: game.dictionary.name)
     end
 
