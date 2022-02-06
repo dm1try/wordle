@@ -47,6 +47,14 @@ describe MultiplayerGame do
       expect(board_game.attempts.first).to eq(["plain", [2,2,2,2,2]])
     end
 
+    it "saves player's attempt result" do
+      game.add_player(1, 'player1')
+      game.start
+      game.attempt(1, 'plain')
+
+      expect(game.players.first.attempts).to eq([[2,2,2,2,2]])
+    end
+
     context 'when player wins' do
       before do
         game.add_player(1, 'player1')
