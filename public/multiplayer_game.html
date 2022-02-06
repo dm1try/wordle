@@ -106,6 +106,16 @@
                 state.players =  payload.data.players;
                 state.player_id = payload.data.player_id;
                 state.dictionary_name = payload.data.dictionary_name;
+                if(state.start_game_time){
+                  state.notify = "You are reconnected!";
+                }else{
+                  state.notify = {
+                    message: 'To start the game, click',
+                    button: {
+                      text: 'Go!',
+                      onClick: onStartGame
+                    }}
+                };
                 // TODO: use server side rendering
                 document.getElementsByName("dictionary")[0].setAttribute('value', state.dictionary_name);
               }else if(payload.type == "attempt") {
@@ -151,7 +161,7 @@
                         onWordSubmit: onWordSubmit,
                         status: 'online',
                         game_language: state.dictionary_name,
-                        notify_message: state.notify}), document.getElementById('game_box'));
+                        notify: state.notify}), document.getElementById('game_box'));
 
               ReactDOM.render(React.createElement(PlayersList, {
                 players: state.players,
@@ -159,9 +169,6 @@
                 current_player_id: state.player_id,
               }), document.getElementById('players_list'))
 
-              ReactDOM.render(React.createElement(MultiplayerControl, {
-                        onClick: onStartGame,
-                        started_at: state.start_game_time}), document.getElementById('start_game'));
             save_state();
           }
 
@@ -196,10 +203,6 @@
         ReactDOM.render(React.createElement(PlayersList, {
                   players: state.players,
                 }), document.getElementById('players_list'))
-
-        ReactDOM.render(React.createElement(MultiplayerControl, {
-                  onClick: onStartGame,
-                  started_at: state.start_game_time}), document.getElementById('start_game'));
 
         var gameSocket = connect();
 
