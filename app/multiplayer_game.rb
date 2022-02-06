@@ -2,7 +2,7 @@ require_relative './game'
 require 'securerandom'
 
 class MultiplayerGame
-  Player = Struct.new(:id, :name)
+  Player = Struct.new(:id, :name, :attempts)
 
   attr_reader :start_time, :end_time, :players, :dictionary, :winner
 
@@ -15,7 +15,7 @@ class MultiplayerGame
 
   def add_player(id, name)
     return false if started?
-    @players << Player.new(id, name)
+    @players << Player.new(id, name, [])
   end
 
   def remove_player(id)
@@ -59,6 +59,7 @@ class MultiplayerGame
 
     attempt_result = game.attempt(word)
 
+    player.attempts << attempt_result
     return game if ended?
 
     if game.status == :won

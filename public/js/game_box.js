@@ -1,14 +1,36 @@
 class NotifyBox extends React.Component {
   render(){
-    return React.createElement('div', {
-      className: "m-2 border px-4 py-3 rounded relative text-center",
-      role: "alert"
-    },
-      React.createElement('span', {
+    var content = null;
+
+    if (typeof(this.props.notify) == 'object') {
+      var button_bg_color = this.props.notify.button.bg_color || 'green';
+
+      content = React.createElement('div', {},
+        React.createElement('span', {
+          className: "block sm:inline"
+        },
+          this.props.notify.message
+        ),
+        React.createElement('button', {
+          onClick: this.props.notify.button.onClick,
+          className: "bg-" + button_bg_color + "-500 hover:bg-" + button_bg_color + "-700 text-white font-bold px-2 mx-1 rounded"
+        },
+          this.props.notify.button.text
+        )
+      )
+    }else{
+      content = React.createElement('span', {
         className: "block sm:inline"
       },
-        this.props.message ||  "Loading..."
+        this.props.notify
       )
+    }
+
+    return React.createElement('div', {
+      className: "m-2 border px-4 py-3 rounded relative text-center animation-shake",
+      role: "alert"
+    },
+      content
     );
   }
 }
@@ -146,12 +168,12 @@ class GameBox extends React.Component {
         status: this.props.status,
       }),
       React.createElement(Board, {
-        attempts: this.props.game.attempts,
+        game: this.props.game,
         current_word: this.state.currentWord,
         onClick: this.props.onClick
       }),
       React.createElement(NotifyBox, {
-        message: this.props.notify_message || this.statusDescription()
+        notify: this.props.notify || this.statusDescription()
       }),
       React.createElement(Keyboard, {
         rows: this.keyboardLayout(),
