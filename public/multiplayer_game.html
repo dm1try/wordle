@@ -18,7 +18,7 @@
       <div class="flex flex-col px-1 py-1 max-w-sm w-full">
         <div id="game_box"></div>
         <div class="flex">
-          <div id="players_list"></div>
+          <div id="players_list" class="w-full"></div>
           <div id="start_game" class="flex"></div>
         </div>
       </div>
@@ -66,6 +66,13 @@
 
         function get_player_by_id(id) {
           return state.players.find(player => player.id == id);
+        }
+
+        function add_player_match(player, match) {
+          if(player["attempts"] == null) {
+            player["attempts"] = [];
+          }
+          player["attempts"].push(match);
         }
 
         var connect = function () {
@@ -142,15 +149,16 @@
               state.notify = 'Game ended in ' + duration + ' seconds! Winner: ' + player.name + '!!!';
               state.winner_id = player.id;
             }else if(payload.notify_type == 'player_joined'){
-              state.players.push(payload.data.player);
+              var player = payload.data.player;
+              player["attempts"] = [];
+              state.players.push(player);
             }else if(payload.notify_type == 'player_ended_game'){
               var player = get_player_by_id(payload.data.player_id);
-              player["last_match"] = payload.data.match;
-
+              add_player_match(player, payload.data.match);
               state.notify = player.name + ' has ended the game!';
             } else if(payload.notify_type == 'player_found_word') {
               var player = get_player_by_id(payload.data.player_id);
-              player["last_match"] = payload.data.match
+              add_player_match(player, payload.data.match);
               state.notify = player.name + ' entered a word!';
             }else if(payload.status == 'error'){
               state.notify = payload.data.message;
