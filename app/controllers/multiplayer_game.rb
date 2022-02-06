@@ -15,7 +15,7 @@ module Controllers
         return error(:game_already_started) if game.started?
 
         player_id = SecureRandom.uuid
-        player_name = "Wordler #{game.players.size + 1}"
+        player_name = message["player_name"] || "Wordler #{game.players.size + 1}"
         game.add_player(player_id, player_name)
 
         $publisher.publish(game_id, :player_joined, {player: {id: player_id, name: player_name}}, conn)
