@@ -76,6 +76,13 @@
           player["attempts"].push(match);
         }
 
+        function mm_ss_time_from_milliseconds(ms){
+          var seconds = Math.floor(ms / 1000);
+          var minutes = Math.floor(seconds / 60);
+          seconds = seconds % 60;
+          return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+        }
+
         var connect = function () {
           var gameSocket = new WebSocket("ws://" + location.host);
 
@@ -147,8 +154,8 @@
             }else if(payload.notify_type == 'game_ended') {
               var player = get_player_by_id(payload.data.winner_id);
               state.end_game_time = Date.parse(payload.data.end_time);
-              var duration = (state.end_game_time - state.start_game_time) / 1000;
-              state.notify = 'Game ended in ' + duration + ' seconds! Winner: ' + player.name + '!!!';
+              var total_ms = Math.floor(state.end_game_time - state.start_game_time);
+              state.notify = player.name + ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
               state.winner_id = player.id;
             }else if(payload.notify_type == 'player_joined'){
               var player = payload.data.player;
