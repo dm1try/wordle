@@ -22,6 +22,7 @@ class Button extends React.Component {
   render() {
     var bgColorClass = this.state.pressed ? 'bg-gray-300 animation-press' : 'bg-gray-100';
 
+    // text-green-600 text-red-600
     var textColorClass = 'text-' + this.props.color + '-600';
     if (this.props.marked) {
       textColorClass = 'text-gray-200';
