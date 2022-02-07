@@ -143,6 +143,10 @@ class GameBox extends React.Component {
   statusDescription(){
     const game_status = this.props.game.status;
 
+    if(this.props.status != 'online'){
+      return 'You are offline!';
+    }
+
     if(game_status == 'in_progress'){
       return 'Playing...';
     }else if(game_status == 'won'){
