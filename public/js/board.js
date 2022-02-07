@@ -8,6 +8,8 @@ class WordLetter extends React.Component {
       className += ' bg-green-500 text-white';
     } else if(this.props.match == 0) {
       className += ' bg-gray-500 text-white';
+    } else if(this.props.match == 4) {
+      className += ' border-2 border-red-300';
     }else {
       className += ' border-2';
     }
@@ -60,9 +62,17 @@ class Board extends React.Component {
 
 
     if(attempt_items.length != 6) {
+      var current_word_matches = this.props.current_word.split('').map((letter, index) => {
+        if (this.props.warning_letters && this.props.warning_letters.includes(letter)) {
+          return 4;
+        }else {
+          return -1;
+        }
+      });
+
       attempt_items.push(React.createElement(
         WordGuess,
-        { key: 99, word: this.props.current_word, matches: Array(this.props.current_word.length) }
+        { key: 99, word: this.props.current_word, matches: current_word_matches }
       ));
     }
 

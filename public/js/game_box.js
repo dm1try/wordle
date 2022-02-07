@@ -170,7 +170,8 @@ class GameBox extends React.Component {
       React.createElement(Board, {
         game: this.props.game,
         current_word: this.state.currentWord,
-        onClick: this.props.onClick
+        onClick: this.props.onClick,
+        warning_letters: this.notFoundLetters(),
       }),
       React.createElement(NotifyBox, {
         notify: this.props.notify || this.statusDescription()
