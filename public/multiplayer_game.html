@@ -43,7 +43,7 @@
       <script>
         var game_id = location.pathname.split('/')[2];
         var saved_state = localStorage.getItem(game_id);
-
+        var gameSocket = null;
         var state = null;
         if(saved_state) {
           state = JSON.parse(saved_state);
@@ -84,10 +84,10 @@
         }
 
         var connect = function () {
-          var gameSocket = new WebSocket("ws://" + location.host);
+          var socket = new WebSocket("ws://" + location.host);
 
-          gameSocket.onopen = function (event) {
-            gameSocket.send(JSON.stringify({
+          socket.onopen = function (event) {
+            socket.send(JSON.stringify({
               type: 'join',
               game_id: game_id,
               player_id: state.player_id,
@@ -96,7 +96,7 @@
             }));
           };
 
-          gameSocket.onclose = function (event) {
+          socket.onclose = function (event) {
             ReactDOM.render(React.createElement(GameBox, {
               game: state.game,
               onWordSubmit: onWordSubmit,
@@ -108,12 +108,12 @@
             save_state();
 
             setTimeout(function () {
-              // gameSocket.removeAllListeners();
-              connect();
+              // socket.removeAllListeners();
+              gameSocket = connect();
             }, 1000);
           }
 
-          gameSocket.onmessage = function (event) {
+          socket.onmessage = function (event) {
             console.log(event.data);
             var payload = JSON.parse(event.data);
 
@@ -199,7 +199,7 @@
             save_state();
           }
 
-          return gameSocket;
+          return socket;
         };
 
         var onWordSubmit = function(word) {
@@ -227,7 +227,7 @@
           game_language: state.dictionary_name,
           status: 'offline'}), document.getElementById('game_box'));
 
-        var gameSocket = connect();
+        gameSocket = connect();
 
         document.getElementById('game_id').value = location;
 
