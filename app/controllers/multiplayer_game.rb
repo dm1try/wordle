@@ -75,7 +75,7 @@ module Controllers
       player_id = message["player_id"]
       player_name = message["player_name"]
 
-      return error(:invalid_name) if !player_name || !player_name.match(/^[a-zA-Z0-9_]{3,20}$/)
+      return error(:invalid_name) if !player_name || !player_name.match(/^[a-zA-Zа-яА-Я0-9_]{3,20}$/)
 
       game.update_player_name(player_id, player_name)
       $publisher.publish(game_id, :player_name_updated, {player_id: player_id, player_name: player_name}, conn)
