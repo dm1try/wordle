@@ -10,6 +10,7 @@
     <link href=/css/main.css rel="stylesheet">
   </head>
   <body>
+    <script src="/js/name_modal.js"></script>
     <script src="/js/game_box.js"></script>
     <script src="/js/keyboard.js"></script>
     <script src="/js/players_list.js"></script>
@@ -43,7 +44,8 @@
       <script>
         var game_id = location.pathname.split('/')[2];
         var saved_state = localStorage.getItem(game_id);
-
+        var player_name = localStorage.getItem('player_name');
+        var gameSocket = null;
         var state = null;
         if(saved_state) {
           state = JSON.parse(saved_state);
@@ -84,10 +86,10 @@
         }
 
         var connect = function () {
-          var gameSocket = new WebSocket("ws://" + location.host);
+          var socket = new WebSocket("ws://" + location.host);
 
-          gameSocket.onopen = function (event) {
-            gameSocket.send(JSON.stringify({
+          socket.onopen = function (event) {
+            socket.send(JSON.stringify({
               type: 'join',
               game_id: game_id,
               player_id: state.player_id,
@@ -96,7 +98,7 @@
             }));
           };
 
-          gameSocket.onclose = function (event) {
+          socket.onclose = function (event) {
             ReactDOM.render(React.createElement(GameBox, {
               game: state.game,
               onWordSubmit: onWordSubmit,
@@ -108,12 +110,12 @@
             save_state();
 
             setTimeout(function () {
-              // gameSocket.removeAllListeners();
-              connect();
+              // socket.removeAllListeners();
+              gameSocket = connect();
             }, 1000);
           }
 
-          gameSocket.onmessage = function (event) {
+          socket.onmessage = function (event) {
             console.log(event.data);
             var payload = JSON.parse(event.data);
 
@@ -147,6 +149,10 @@
                   state.game = payload.data.game;
                   state.notify = 'You will definitely win next time!';
                 }
+              }else if(payload.type == "update_name"){
+                var player = get_player_by_id(payload.data.player_id);
+                player.name = payload.data.player_name;
+                localStorage.setItem('player_name', player.name);
               }
             }else if(payload.notify_type == 'game_started') {
               state.notify = 'Game has started! The fastest one wins!';
@@ -169,6 +175,9 @@
               var player = get_player_by_id(payload.data.player_id);
               add_player_match(player, payload.data.match);
               state.notify = player.name + ' entered a word!';
+            } else if(payload.notify_type == 'player_name_updated') {
+              var player = get_player_by_id(payload.data.player_id);
+              player.name = payload.data.player_name;
             }else if(payload.status == 'error'){
               if(payload.data.error == 'game_not_started'){
                 state.notify = {
@@ -188,6 +197,8 @@
                         onWordSubmit: onWordSubmit,
                         status: 'online',
                         game_language: state.dictionary_name,
+                        player_name: localStorage.getItem('player_name'),
+                        onNameSubmit: onNameSubmit,
                         notify: state.notify}), document.getElementById('game_box'));
 
               ReactDOM.render(React.createElement(PlayersList, {
@@ -199,7 +210,7 @@
             save_state();
           }
 
-          return gameSocket;
+          return socket;
         };
 
         var onWordSubmit = function(word) {
@@ -221,13 +232,25 @@
           }));
         }
 
+        var onNameSubmit = function(name) {
+          gameSocket.send(JSON.stringify({
+            channel: 'multiplayer',
+            player_id: state.player_id,
+            game_id: state.game_id,
+            type: 'update_name',
+            player_name: name
+          }));
+        }
+
         ReactDOM.render(React.createElement(GameBox, {
           game: state.game,
           onWordSubmit: onWordSubmit,
           game_language: state.dictionary_name,
+          player_name: localStorage.getItem('player_name'),
+          onNameSubmit: onNameSubmit,
           status: 'offline'}), document.getElementById('game_box'));
 
-        var gameSocket = connect();
+        gameSocket = connect();
 
         document.getElementById('game_id').value = location;
 

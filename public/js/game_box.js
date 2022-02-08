@@ -40,17 +40,38 @@ class GameStatus extends React.Component {
     var bgColorClass = this.props.status === 'online' ? 'bg-green-500' : 'bg-red-500 animate-pulse';
 
     return React.createElement('div', {
-      className: 'flex justify-center'
+      className: 'flex justify-around'
     },
+      React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        className: "h-6 w-6 cursor-pointer",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor"
+      }, React.createElement("path", {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        strokeWidth: 2,
+        d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      }))
+      ,
       React.createElement('div', {
-        className: 'text-xl font-bold'
+        className: 'flex justfify-center '
       },
-        'WORDLE'),
-      React.createElement('div', {
-        className: 'w-2 h-2 rounded ' + bgColorClass,
-        id: 'status'},
-        '')
-    );
+        React.createElement('div', {
+          className: 'text-xl font-bold'
+        },
+          'WORDLE'),
+        React.createElement('div', {
+          className: 'w-2 h-2 rounded ' + bgColorClass,
+          id: 'status'},
+          '')
+      ),
+      React.createElement(NameModal, {
+        onSubmit: this.props.onNameSubmit,
+        value: this.props.player_name
+      })
+    )
   }
 }
 
@@ -143,6 +164,10 @@ class GameBox extends React.Component {
   statusDescription(){
     const game_status = this.props.game.status;
 
+    if(this.props.status != 'online'){
+      return 'You are offline!';
+    }
+
     if(game_status == 'in_progress'){
       return 'Playing...';
     }else if(game_status == 'won'){
@@ -166,6 +191,8 @@ class GameBox extends React.Component {
     },
       React.createElement(GameStatus, {
         status: this.props.status,
+        onNameSubmit: this.props.onNameSubmit,
+        player_name: this.props.player_name
       }),
       React.createElement(Board, {
         game: this.props.game,

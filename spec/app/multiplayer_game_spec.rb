@@ -38,6 +38,14 @@ describe MultiplayerGame do
     end
   end
 
+  describe '#update_player_name' do
+    it 'updates the name of a player' do
+      game.add_player(1, 'player1')
+      game.update_player_name(1, 'player2')
+      expect(game.players[0].name).to eq('player2')
+    end
+  end
+
   describe '#attempt' do
     it 'returns board game' do
       game.add_player(1, 'player1')

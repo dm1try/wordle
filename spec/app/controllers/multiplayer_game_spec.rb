@@ -121,5 +121,48 @@ describe Controllers::MultiplayerGame do
         end
       end
     end
+
+    describe '#update_name' do
+      let(:player_id) { '1' }
+      let(:player_name) { 'name' }
+      let(:new_player_name) { 'new_name' }
+
+      let(:message) {
+        {
+          'type' => 'update_name', 'game_id' => 'game_id', 'channel' => 'test',
+          'player_id' => player_id, 'player_name' => new_player_name
+        }
+      }
+      let(:game) { MultiplayerGame.new(Game::Dictionary::Test.new([], [])) }
+
+      before do
+        $live_games['game_id'] = game
+        game.add_player(player_id, player_name)
+      end
+
+      it 'updates a player name' do
+        subject.run
+
+        expect(connection).to have_received(:send) do |response|
+          json_response = JSON.parse(response)
+          expect(json_response['data']['player_name']).to eq(new_player_name)
+        end
+      end
+
+      context 'with invalid name' do
+        let(:new_player_name) { 'x' }
+
+        it 'sends an error message' do
+          subject.run
+
+          expect(connection).to have_received(:send).with({
+            status: 'error',
+            type: :update_name,
+            data: {error: :invalid_name, message: 'Invalid name'},
+            channel: 'test'
+          }.to_json)
+        end
+      end
+    end
   end
 end

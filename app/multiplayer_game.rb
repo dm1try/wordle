@@ -26,6 +26,12 @@ class MultiplayerGame
     @players.any? { |player| player.id == id }
   end
 
+  def update_player_name(id, name)
+    @players.each do |player|
+      player.name = name if player.id == id
+    end
+  end
+
   def start
     puts "Game started at #{@start_time}"
     puts "Players: #{@players.join(', ')}"
