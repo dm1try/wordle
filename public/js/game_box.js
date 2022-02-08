@@ -58,8 +58,9 @@ class GameStatus extends React.Component {
       React.createElement('div', {
         className: 'flex justfify-center '
       },
-        React.createElement('div', {
-          className: 'text-xl font-bold'
+        React.createElement('a', {
+          className: 'text-xl font-bold',
+          href: '/'
         },
           'WORDLE'),
         React.createElement('div', {
