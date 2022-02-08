@@ -66,6 +66,23 @@ module Controllers
       end
     end
 
+    def update_name
+      game_id = message["game_id"]
+      game = $live_games[game_id]
+
+      return error(:game_not_found) unless game
+
+      player_id = message["player_id"]
+      player_name = message["player_name"]
+
+      return error(:invalid_name) if !player_name || !player_name.match(/^[a-zA-Z0-9_]{3,20}$/)
+
+      game.update_player_name(player_id, player_name)
+      $publisher.publish(game_id, :player_name_updated, {player_id: player_id, player_name: player_name}, conn)
+
+      ok(player_id: player_id, player_name: player_name)
+    end
+
     private
 
     def iso8601(date)
