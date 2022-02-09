@@ -47,7 +47,7 @@ class GameStatus extends React.Component {
         className: "h-6 w-6 cursor-pointer",
         fill: "none",
         viewBox: "0 0 24 24",
-        stroke: "currentColor"
+        stroke: "transparent",
       }, React.createElement("path", {
         strokeLinecap: "round",
         strokeLinejoin: "round",
