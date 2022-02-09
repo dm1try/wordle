@@ -17,10 +17,10 @@ describe "Wordle", type: :feature do
   context 'cooperative mode' do
     it "allows to play a new game and win :)" do
       visit '/'
-      expect(page).to have_content 'Start'
+      expect(page).to have_content 'Create'
 
       select "Cooperative Mode 🤝", :from => "mode"
-      find("button", :text => "Start").click
+      find("button", :text => "Create").click
       expect(page).to have_content 'WORDLE'
 
       find("body").send_keys("plain\n")
@@ -35,10 +35,10 @@ describe "Wordle", type: :feature do
     it 'allows to do the competion between players' do
       Capybara.using_session('player1') do
         visit '/'
-        expect(page).to have_content 'Start'
+        expect(page).to have_content 'Create'
 
-        select "Competition Mode 🏁", :from => "mode"
-        find("button", :text => "Start").click
+        select "Time Competition 🏁", :from => "mode"
+        find("button", :text => "Create").click
         expect(page).to have_content 'WORDLE'
         @game_url = page.current_url
       end
