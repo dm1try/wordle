@@ -28,7 +28,7 @@
         <div class="my-2 w-full max-w-sm">
           <div class="my-2 flex">
             <input class="flex-1 rounded border text-ellipsis" id="game_id" readonly></input>
-            <button id="copy" class="rounded border px-1 py-1 bg-blue-600 text-gray-50" >Copy game link</button>
+            <button id="copy" class="rounded border px-1 py-1 bg-blue-500 hover:bg-blue-600 text-gray-50" >Copy game link</button>
           </div>
         </div>
         <form action="/new" method="get" class="bg-transparent flex justify-center">
@@ -128,7 +128,7 @@
                   state.notify = "You are reconnected!";
                 }else{
                   state.notify = {
-                    message: 'To start the game, click',
+                    message: 'Share, wait for everyone and click',
                     button: {
                       text: 'Go!',
                       onClick: onStartGame

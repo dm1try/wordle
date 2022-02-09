@@ -149,6 +149,19 @@ describe Controllers::MultiplayerGame do
         end
       end
 
+      context 'with russian letters' do
+        let(:new_player_name) { 'имя' }
+
+        it 'updates a player name' do
+          subject.run
+
+          expect(connection).to have_received(:send) do |response|
+            json_response = JSON.parse(response)
+            expect(json_response['data']['player_name']).to eq(new_player_name)
+          end
+        end
+      end
+
       context 'with invalid name' do
         let(:new_player_name) { 'x' }
 
