@@ -42,7 +42,8 @@
         };
 
         var connect = function () {
-          var gameSocket = new WebSocket("ws://" + location.host);
+          var ws_protocol = location.protocol == "https:" ? "wss:" : "ws:";
+          var gameSocket = new WebSocket(ws_protocol + "//" + location.host);
 
           gameSocket.onopen = function (event) {
             gameSocket.send(JSON.stringify({
