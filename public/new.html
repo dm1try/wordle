@@ -4,13 +4,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/css/prod.css" rel="stylesheet">
   </head>
-  <body class="flex flex-col justify-center items-center">
-    <div class="flex justify-center">
+  <body class="flex flex-col justify-top items-center">
+    <div class="flex justify-center m-2">
       <h1 class="text-4xl">WORDLE</h1>
-      <div class="w-2 h-2 bg-green-500 rounded-full m-1"></div>
+      <div class="w-2 h-2 bg-green-500 rounded-full"></div>
     </div>
 
-    <ul class="m-4 p-2 border-2 border-gray-100 rounded list-disc list-inside max-w-sm w-full">
+    <ul class="p-2 border-2 border-gray-100 rounded list-disc list-inside max-w-sm w-full">
       <li>
         Guess the word in 6 tries.
       </li>
@@ -62,7 +62,7 @@
       </li>
     </ul>
 
-    <div class="max-w-sm w-full">
+    <div class="m-2 max-w-sm w-full">
       <form action="/new" method="get" class="bg-transparent flex justify-evenly">
         <select name="mode" class="appearance-none px-2 border rounded bg-white">
           <option value="coop">Cooperative Mode 🤝</option>
