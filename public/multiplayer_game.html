@@ -86,7 +86,8 @@
         }
 
         var connect = function () {
-          var socket = new WebSocket("ws://" + location.host);
+          var ws_protocol = location.protocol == "https:" ? "wss:" : "ws:";
+          var socket = new WebSocket(ws_protocol + "//" + location.host);
 
           socket.onopen = function (event) {
             socket.send(JSON.stringify({
