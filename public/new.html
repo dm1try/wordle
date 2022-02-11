@@ -4,9 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/css/prod.css" rel="stylesheet">
   </head>
-  <body class="flex flex-col justify-top items-center">
-    <div class="flex justify-center m-2">
-      <h1 class="text-4xl">WORDLE</h1>
+  <body class="flex flex-col justify-top items-center m-4">
+    <div class="flex justify-center m-1">
+      <div class="text-xl font-bold">WORDLE</div>
       <div class="w-2 h-2 bg-green-500 rounded-full"></div>
     </div>
 
@@ -41,19 +41,19 @@
 
           <div class="flex mx-2 items-center">
             <div class="text-center text-4xl leading-relaxed h-8 w-8 text-extrabold uppercase bg-green-500 text-white m-1"> </div>
-            <span> means the letter is <b>in the right spot</b>.</span>
+            <span> a letter is <b>in a right spot</b>.</span>
           </div>
           <div class="flex mx-2 items-center">
             <div class="text-center text-4xl leading-relaxed h-8 w-8 text-extrabold uppercase bg-yellow-500 text-white m-1"> </div>
-            <span> means the letter is <b>in the wrong spot</b>.</span>
+            <span> a letter is <b>in a wrong spot</b>.</span>
           </div>
           <div class="flex mx-2 items-center">
             <div class="text-center text-4xl leading-relaxed h-8 w-8 text-extrabold uppercase bg-gray-500 text-white m-1"> </div>
-            <span> means the letter is <b>not in the word</b>.</span>
+            <span> a letter is <b>not in a word</b>.</span>
           </div>
           <div class="flex mx-2 items-center">
             <div class="text-center text-4xl leading-relaxed h-8 w-8 text-extrabold uppercase border-2 border-red-300 m-1"> </div>
-            <span> means the <b>typed</b> letter is <b>not in the word</b>.</span>
+            <span> a <b>typed</b> letter is <b>not in a word</b>.</span>
           </div>
         </div>
       </li>
@@ -61,7 +61,7 @@
         Be the fastest in Time Competition.
       </li>
     </ul>
-
+</div>
     <div class="m-2 max-w-sm w-full">
       <form action="/new" method="get" class="bg-transparent flex justify-evenly">
         <select name="mode" class="appearance-none px-2 border rounded bg-white">
@@ -72,7 +72,7 @@
           <option value="ru"> Rus 🇷🇺 </option>
           <option selected value="en"> Eng 🇺🇸 </option>
         </select>
-        <button class="inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
+        <button class="inline-flex items-center px-3 py-1 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
           Create
         </button>
       </form>

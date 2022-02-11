@@ -40,23 +40,30 @@ class GameStatus extends React.Component {
     var bgColorClass = this.props.status === 'online' ? 'bg-green-500' : 'bg-red-500 animate-pulse';
 
     return React.createElement('div', {
-      className: 'flex justify-around'
+      className: 'flex justify-between items-center'
     },
-      React.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        className: "h-6 w-6 cursor-pointer",
-        fill: "none",
-        viewBox: "0 0 24 24",
-        stroke: "transparent",
-      }, React.createElement("path", {
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        strokeWidth: 2,
-        d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      }))
-      ,
       React.createElement('div', {
-        className: 'flex justfify-center '
+        className: 'flex justify-center'
+      },
+        React.createElement("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          className: "mx-1 h-6 w-6 cursor-pointer",
+          fill: "none",
+          viewBox: "0 0 24 24",
+          stroke: "currentColor",
+        }, React.createElement("path", {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          strokeWidth: 2,
+          d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        })),
+        React.createElement(NameModal, {
+          onSubmit: this.props.onNameSubmit,
+          value: this.props.player_name
+        })
+      ),
+      React.createElement('div', {
+        className: 'flex justify-center '
       },
         React.createElement('a', {
           className: 'text-xl font-bold',
@@ -68,10 +75,23 @@ class GameStatus extends React.Component {
           id: 'status'},
           '')
       ),
-      React.createElement(NameModal, {
-        onSubmit: this.props.onNameSubmit,
-        value: this.props.player_name
-      })
+      React.createElement("div", {
+        className: "flex justify-center"
+      },
+        React.createElement(MenuItem, {
+          id: 'menu-copy-link',
+          onClick: function(){ navigator.clipboard.writeText(window.location.href); },
+          title: "Copy game link",
+          afterClickTitle: "Copied to clipboard!",
+          path_d: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+        }),
+        React.createElement(MenuItem, {
+          id: 'menu-new-game',
+          onClick: function(){ document.getElementById('new_game_form').submit(); },
+          title: "New game",
+          path_d: "M12 4v16m8-8H4"
+        })
+      )
     )
   }
 }
