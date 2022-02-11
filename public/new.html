@@ -4,9 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="flex flex-col justify-top items-center">
-    <div class="flex justify-center m-2">
-      <h1 class="text-4xl">WORDLE</h1>
+  <body class="flex flex-col justify-top items-center m-4">
+    <div class="flex justify-center m-1">
+      <div class="text-xl font-bold">WORDLE</div>
       <div class="w-2 h-2 bg-green-500 rounded-full"></div>
     </div>
 
@@ -61,7 +61,7 @@
         Be the fastest in Time Competition.
       </li>
     </ul>
-
+</div>
     <div class="m-2 max-w-sm w-full">
       <form action="/new" method="get" class="bg-transparent flex justify-evenly">
         <select name="mode" class="appearance-none px-2 border rounded bg-white">
@@ -72,7 +72,7 @@
           <option value="ru"> Rus 🇷🇺 </option>
           <option selected value="en"> Eng 🇺🇸 </option>
         </select>
-        <button class="inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
+        <button class="inline-flex items-center px-3 py-1 border border-transparent text-base font-medium rounded-md text-gray-50 bg-green-600 hover:bg-green-700">
           Create
         </button>
       </form>

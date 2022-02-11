@@ -34,7 +34,7 @@ class NameModal extends React.Component {
     if (this.state.show){
       form = React.createElement(
         "form",
-        {className: "rounded fixed my-8 -mx-40 border-2 border-gray-200 p-2",
+        {className: "rounded fixed my-8 border-2 border-gray-200 p-2",
           style: {backgroundColor: '#f5f5f5'}},
         React.createElement('input', {type: "text",
           name: "player_name",
@@ -42,7 +42,7 @@ class NameModal extends React.Component {
           onKeyUp: this.onKeyUp.bind(this),
           onKeyDown: this.onKeyDown.bind(this),
           autoFocus: true,
-          className: "",
+          className: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline",
           placeholder: "Enter your name",
         })
       )
@@ -53,7 +53,7 @@ class NameModal extends React.Component {
     },
       React.createElement("svg", {
         xmlns: "http://www.w3.org/2000/svg",
-        className: "h-6 w-6 cursor-pointer",
+        className: "mx-1 h-6 w-6 cursor-pointer",
         fill: "none",
         viewBox: "0 0 24 24",
         stroke: "currentColor",
