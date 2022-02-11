@@ -52,7 +52,7 @@ class App
       end
 
       r.on 'new' do
-        game_id = SecureRandom.uuid
+        game_id = SecureRandom.hex(3)
 
         guesses_set_name = 'words'
         available_words_set_name = 'available_words'
