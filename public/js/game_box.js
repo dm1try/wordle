@@ -145,7 +145,7 @@ class GameBox extends React.Component {
   }
 
   notFoundLetters(){
-    var total_match_letters = []
+    var already_matched_letters = []
 
     return this.props.game.attempts.reduce(function (not_found_letters, attempt) {
       var attempt_word = attempt[0];
@@ -155,8 +155,8 @@ class GameBox extends React.Component {
         attempt_match.reduce(function (not_found_letters, match, index) {
           if(match == 0) {
             not_found_letters.push(attempt_word[index]);
-          }else if(match == 2){
-            total_match_letters.push(attempt_word[index]);
+          }else{
+            already_matched_letters.push(attempt_word[index]);
           }
           return not_found_letters;
         }, []);
@@ -164,7 +164,7 @@ class GameBox extends React.Component {
       not_found_letters = not_found_letters.concat(not_found_letters_in_word);
       // TODO: made a proper fix for two letters match
       not_found_letters = not_found_letters.filter(function (letter, index) {
-        return total_match_letters.indexOf(letter) == -1;
+        return already_matched_letters.indexOf(letter) == -1;
       });
       return not_found_letters;
     }, []);
