@@ -13,7 +13,7 @@ class NotifyBox extends React.Component {
         ),
         React.createElement('button', {
           onClick: this.props.notify.button.onClick,
-          className: "bg-" + button_bg_color + "-500 hover:bg-" + button_bg_color + "-700 text-white font-bold px-2 mx-1 rounded"
+          className: "bg-" + button_bg_color + "-600 hover:bg-" + button_bg_color + "-700 text-white font-bold px-1 mx-1 rounded"
         },
           this.props.notify.button.text
         )
