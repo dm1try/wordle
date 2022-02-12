@@ -15,7 +15,6 @@ class MenuItem extends React.Component {
     }
   }
   render() {
-    console.log(this.state.title);
     return React.createElement('div', {
       "data-tooltip-target": "tooltip-bottom-" + this.props.id,
       "data-tooltip-placement": "bottom",

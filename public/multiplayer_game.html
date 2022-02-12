@@ -118,6 +118,9 @@
                 state.players =  payload.data.players;
                 state.player_id = payload.data.player_id;
                 state.dictionary_name = payload.data.dictionary_name;
+                if(payload.data.start_time) {
+                  state.start_game_time = Date.parse(payload.data.start_time);
+                }
                 if(state.start_game_time){
                   state.notify = "You are reconnected!";
                 }else{

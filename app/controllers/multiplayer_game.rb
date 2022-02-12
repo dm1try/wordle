@@ -23,7 +23,8 @@ module Controllers
       $publisher.subscribe(game_id, conn)
 
       players = game.players.map { |p| {id: p.id, name: p.name, attempts: p.attempts} }
-      ok(player_id: player_id, players: players, dictionary_name: game.dictionary.name)
+      start_time = iso8601(game.start_time) if game.started?
+      ok(player_id: player_id, players: players, dictionary_name: game.dictionary.name, start_time: start_time)
     end
 
     def start
