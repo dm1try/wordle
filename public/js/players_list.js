@@ -1,41 +1,44 @@
 class GamePreview extends React.Component {
-  attempt_string(attempt){
-    return attempt.map((value) => {
+  attempt_row(attempt, index){
+    return attempt.map((value, match_index) => {
       if(value == 2){
-        return String.fromCodePoint(129001); // 🟩
+        return React.createElement('div', {
+          key: index + '-' + match_index,
+          className: 'h-5 w-5 bg-green-500'
+        })
       } else if(value == 1){
-        return String.fromCodePoint(129000);//🟨
+        return React.createElement('div', {
+          key: index + '-' + match_index,
+          className: 'h-5 w-5 bg-yellow-500'
+        })
       }else {
-        return String.fromCodePoint(11036); //⬜
+        return React.createElement('div', {
+          key: index + '-' + match_index,
+          className: 'h-5 w-5 bg-gray-500'
+        })
       }
-    }).join('');
+    });
   }
 
   render(){
-    var attempts = this.props.attempts.map(function(attempt, index){
-      return React.createElement('div', {
-        key: index,
-        style: {
-          fontFamily: 'monospace'
-        }
-      },
-        this.attempt_string(attempt))
+    var attempts = [];
+    this.props.attempts.forEach(function(attempt, index){
+      attempts = attempts.concat(this.attempt_row(attempt, index));
     }.bind(this))
 
     var remaining_attempts = 6 - this.props.attempts.length;
     for(var i = 0; i < remaining_attempts; i++){
-      attempts.push(React.createElement('div', {
-        key: i + remaining_attempts,
-        style: {
-          fontFamily: 'monospace'
-        }
-      },
-        '⬜⬜⬜⬜⬜'
-      ))
+      for(var j = 0; j < 5; j++){
+        attempts.push(React.createElement('div', {
+          key: this.props.attempts.length + i + '-' + j,
+          className: 'text-center h-5 w-5 border-2'
+        }))
+      }
     }
 
-    return React.createElement('div',
-      {className: ''},
+    return React.createElement('div',{
+      className: 'grid grid-cols-5 gap-x-0.5 gap-y-0.5 m-1'
+    },
       attempts
     )
   }
