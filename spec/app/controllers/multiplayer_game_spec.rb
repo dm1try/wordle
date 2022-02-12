@@ -88,12 +88,14 @@ describe Controllers::MultiplayerGame do
         game.start
       end
 
-      it 'sends players data in the response' do
+      it 'sends players data and game start time in the response' do
         subject.run
 
         expect(connection).to have_received(:send) do |response|
           json_response = JSON.parse(response)
-          expect(json_response['data']['players']).to eq([{'id' => player_id, 'name' => player_name, 'attempts' => []}])
+          expect(json_response['data']['players']).to eq([{'id' => player_id, 'name' => player_name,
+                                                           'attempts' => []}])
+          expect(json_response['data']['start_time']).to be
         end
       end
     end
