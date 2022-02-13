@@ -1,28 +1,55 @@
 class NotifyBox extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      permanent_button: null
+    }
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.notify.button &&
+      props.notify.button.permanent == true && state.permanent_button == null) {
+      return {permanent_button: props.notify.button}
+    }else{
+      return null;
+    }
+  }
+
+  renderNotifyWithButton(notify_message, notify_button){
+    var button_bg_color = notify_button.bg_color || 'green';
+
+    var button = React.createElement('button', {
+      onClick: notify_button.onClick,
+      className: "bg-" + button_bg_color + "-600 hover:bg-" + button_bg_color + "-700 text-white font-bold px-1 mx-1 rounded"
+    },
+      notify_button.text
+    )
+
+    return React.createElement('div', {},
+      React.createElement('span', {
+        className: "block sm:inline"
+      },
+        notify_message
+      ),
+      button
+    )
+  }
+
   render(){
     var content = null;
 
     if (typeof(this.props.notify) == 'object') {
-      var button_bg_color = this.props.notify.button.bg_color || 'green';
-
+      content =  this.renderNotifyWithButton(this.props.notify.message, this.props.notify.button);
+    }else if(this.state.permanent_button != null){
+      content = this.renderNotifyWithButton(this.props.notify, this.state.permanent_button);
+    }else{
       content = React.createElement('div', {},
         React.createElement('span', {
           className: "block sm:inline"
         },
-          this.props.notify.message
+          this.props.notify
         ),
-        React.createElement('button', {
-          onClick: this.props.notify.button.onClick,
-          className: "bg-" + button_bg_color + "-500 hover:bg-" + button_bg_color + "-700 text-white font-bold px-2 mx-1 rounded"
-        },
-          this.props.notify.button.text
-        )
-      )
-    }else{
-      content = React.createElement('span', {
-        className: "block sm:inline"
-      },
-        this.props.notify
+        this.state.permanent_button
       )
     }
 

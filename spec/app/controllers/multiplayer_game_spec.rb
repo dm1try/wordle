@@ -47,12 +47,14 @@ describe Controllers::MultiplayerGame do
       it 'sends a success message' do
         subject.run
 
-        expect(connection).to have_received(:send).with({
-          status: 'ok',
-          type: :join,
-          data: {player_id: fake_player_id, players: [], dictionary_name: 'en'},
-          channel: 'test'
-        }.to_json)
+        expect(connection).to have_received(:send) do |message|
+          json_payload = JSON.parse(message, symbolize_names: true)
+          expect(json_payload).to include({status: 'ok',
+                                           type: 'join',
+                                           data: {player_id: fake_player_id, players: [], dictionary_name: 'en', start_time: nil},
+                                           channel: 'test'
+          })
+        end
       end
 
       context 'when player is already in the game' do
@@ -66,12 +68,14 @@ describe Controllers::MultiplayerGame do
         it 'sends a success message' do
           subject.run
 
-          expect(connection).to have_received(:send).with({
-            status: 'ok',
-            type: :join,
-            data: {player_id: existing_player_id, players: [], dictionary_name: 'en'},
-            channel: 'test'
-          }.to_json)
+          expect(connection).to have_received(:send) do |message|
+            json_payload = JSON.parse(message, symbolize_names: true)
+            expect(json_payload).to include({status: 'ok',
+                                             type: 'join',
+                                             data: {player_id: existing_player_id, players: [], dictionary_name: 'en', start_time: nil},
+                                             channel: 'test'
+            })
+          end
         end
       end
     end
@@ -176,6 +180,37 @@ describe Controllers::MultiplayerGame do
             data: {error: :invalid_name, message: 'Invalid name'},
             channel: 'test'
           }.to_json)
+        end
+      end
+    end
+
+    describe '#repeat' do
+      let(:player_id) { '1' }
+      let(:player_name) { 'name' }
+
+      let(:message) {
+        {
+          'type' => 'repeat', 'game_id' => 'game_id', 'channel' => 'test', 'player_id' => player_id
+        }
+      }
+      let(:game) { MultiplayerGame.new(Game::Dictionary::Test.new(['plain'], ['plain'])) }
+
+
+      context 'when the game is ended' do
+        before do
+          $live_games['game_id'] = game
+          game.add_player(player_id, player_name)
+          game.start
+          game.attempt(player_id, 'plain')
+        end
+
+        it 'creates a new one and sends it id' do
+          subject.run
+
+          expect(connection).to have_received(:send) do |response|
+            json_response = JSON.parse(response)
+            expect(json_response['data']['game_id']).to match(/\A\w+\z/)
+          end
         end
       end
     end
