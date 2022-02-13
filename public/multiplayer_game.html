@@ -268,7 +268,58 @@
           }));
         }
 
-        var onShareGame = function(){ navigator.clipboard.writeText("I was the fastest!!!"); }
+        function playerTextPreview(player_name, attempts) {
+          var result = player_name + '\n';
+
+          attempts.forEach(function(attempt) {
+            result += attempt.map(function(match){
+              if(match == 0){
+                return '⬛';
+              } else if(match == 1){
+                return '🟨';
+              }else if(match == 2){
+                return '🟩';
+              }
+            }
+            ).join('')
+            result += '\n';
+          });
+
+          return result;
+        }
+
+        var onShareGame = function(){
+          var total_time  = state.end_game_time - state.start_game_time;
+          var guess_word = state.game.attempts[state.game.attempts.length - 1][0];
+          var share_message = 'I was faster than the others and guessed the word ' + guess_word.toUpperCase() + ' in ' + mm_ss_time_from_milliseconds(total_time);
+
+          share_message += '\n\n';
+
+          var current_player = get_player_by_id(state.player_id);
+          var current_player_attempts = state.game.attempts.map(function(attempt){
+            return attempt[1];
+          })
+          share_message += playerTextPreview(current_player.name, current_player_attempts);
+          share_message += '\n';
+          state.players.forEach(function(player){
+            if(player.id != state.player_id){
+              share_message += playerTextPreview(player.name, player.attempts);
+              share_message += '\n';
+            }
+          })
+          share_message += location.protocol + '//' + location.host;
+          navigator.clipboard.writeText(share_message);
+
+          state.notify = 'Copied to clipboard!';
+          ReactDOM.render(React.createElement(GameBox, {
+                    game: state.game,
+                    onWordSubmit: onWordSubmit,
+                    status: 'online',
+                    game_language: state.dictionary_name,
+                    player_name: localStorage.getItem('player_name'),
+                    onNameSubmit: onNameSubmit,
+                    notify: state.notify}), document.getElementById('game_box'));
+        }
 
         var onNameSubmit = function(name) {
           gameSocket.send(JSON.stringify({
