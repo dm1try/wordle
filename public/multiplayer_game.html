@@ -198,7 +198,7 @@
               player.name = payload.data.player_name;
             } else if(payload.notify_type == 'repeat_game_created') {
               state.notify = {
-                message: 'New game created!',
+                message: 'Again?',
                 buttons: [{
                   text: 'Rejoin!',
                   onClick: function() { location.href = '/games/' + payload.data.game_id; },
