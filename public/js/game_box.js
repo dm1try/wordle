@@ -2,28 +2,35 @@ class NotifyBox extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      permanent_button: null
+      permanent_buttons: null
     }
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.notify.button &&
-      props.notify.button.permanent == true && state.permanent_button == null) {
-      return {permanent_button: props.notify.button}
-    }else{
-      return null;
+    if (props.notify.buttons) {
+      var permanent_buttons = props.notify.buttons.filter(function(button){
+        return button.permanent
+      })
+
+      if (permanent_buttons.length > 0) {
+        return {permanent_buttons: permanent_buttons}
+      }
     }
+    return null;
   }
 
-  renderNotifyWithButton(notify_message, notify_button){
-    var button_bg_color = notify_button.bg_color || 'green';
+  renderNotifyWithButtons(notify_message, notify_buttons){
+    var buttons = notify_buttons.map(function(notify_button, index){
+      var button_bg_color = notify_button.bg_color || 'green';
 
-    var button = React.createElement('button', {
-      onClick: notify_button.onClick,
-      className: "bg-" + button_bg_color + "-600 hover:bg-" + button_bg_color + "-700 text-white font-bold px-1 mx-1 rounded"
-    },
-      notify_button.text
-    )
+      return React.createElement('button', {
+        key: 'notify_button' + index,
+        onClick: notify_button.onClick,
+        className: "bg-" + button_bg_color + "-600 hover:bg-" + button_bg_color + "-700 text-white font-bold px-1 mx-1 rounded"
+      },
+        notify_button.text
+      )
+    })
 
     return React.createElement('div', {},
       React.createElement('span', {
@@ -31,7 +38,7 @@ class NotifyBox extends React.Component {
       },
         notify_message
       ),
-      button
+      buttons
     )
   }
 
@@ -39,9 +46,9 @@ class NotifyBox extends React.Component {
     var content = null;
 
     if (typeof(this.props.notify) == 'object') {
-      content =  this.renderNotifyWithButton(this.props.notify.message, this.props.notify.button);
-    }else if(this.state.permanent_button != null){
-      content = this.renderNotifyWithButton(this.props.notify, this.state.permanent_button);
+      content =  this.renderNotifyWithButtons(this.props.notify.message, this.props.notify.buttons);
+    }else if(this.state.permanent_buttons != null){
+      content = this.renderNotifyWithButtons(this.props.notify, this.state.permanent_buttons);
     }else{
       content = React.createElement('div', {},
         React.createElement('span', {
@@ -49,7 +56,7 @@ class NotifyBox extends React.Component {
         },
           this.props.notify
         ),
-        this.state.permanent_button
+        this.state.permanent_buttons
       )
     }
 

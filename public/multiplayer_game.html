@@ -126,10 +126,11 @@
                 }else{
                   state.notify = {
                     message: 'Share, wait for everyone and click',
-                    button: {
+                    buttons: [{
                       text: 'Go!',
                       onClick: onStartGame
-                    }}
+                    }]
+                  }
                 };
                 // TODO: use server side rendering
                 document.getElementsByName("dictionary")[0].setAttribute('value', state.dictionary_name);
@@ -165,11 +166,11 @@
               if(payload.data.winner_id == state.player_id){
                 state.notify = {
                   message: congrats_message,
-                  button: {
+                  buttons: [{
                     text: 'Repeat!',
                     onClick: onRepeatGame,
                     permanent: true
-                  }
+                  }]
                 }
               }else{
                 state.notify = congrats_message;
@@ -193,20 +194,20 @@
             } else if(payload.notify_type == 'repeat_game_created') {
               state.notify = {
                 message: 'New game created!',
-                button: {
+                buttons: [{
                   text: 'Rejoin!',
                   onClick: function() { location.href = '/games/' + payload.data.game_id; },
                   permanent: true
-                }
+                }]
               }
             }else if(payload.status == 'error'){
               if(payload.data.error == 'game_not_started'){
                 state.notify = {
                   message: 'Game has not started yet! Click',
-                  button: {
+                  buttons: [{
                     text: 'Go!',
                     onClick: onStartGame
-                  }
+                  }]
                 }
               }else{
                 state.notify = payload.data.message;
