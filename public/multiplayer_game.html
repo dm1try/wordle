@@ -167,7 +167,8 @@
                   message: congrats_message,
                   button: {
                     text: 'Repeat!',
-                    onClick: onRepeatGame
+                    onClick: onRepeatGame,
+                    permanent: true
                   }
                 }
               }else{
@@ -194,7 +195,8 @@
                 message: 'New game created!',
                 button: {
                   text: 'Rejoin!',
-                  onClick: function() { location.href = '/games/' + payload.data.game_id; }
+                  onClick: function() { location.href = '/games/' + payload.data.game_id; },
+                  permanent: true
                 }
               }
             }else if(payload.status == 'error'){
