@@ -126,10 +126,11 @@
                 }else{
                   state.notify = {
                     message: 'Share, wait for everyone and click',
-                    button: {
+                    buttons: [{
                       text: 'Go!',
                       onClick: onStartGame
-                    }}
+                    }]
+                  }
                 };
                 // TODO: use server side rendering
                 document.getElementsByName("dictionary")[0].setAttribute('value', state.dictionary_name);
@@ -161,18 +162,23 @@
               var player = get_player_by_id(payload.data.winner_id);
               state.end_game_time = Date.parse(payload.data.end_time);
               var total_ms = Math.floor(state.end_game_time - state.start_game_time);
-              var congrats_message = player.name + ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
+              var congrats_message = ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
               if(payload.data.winner_id == state.player_id){
                 state.notify = {
-                  message: congrats_message,
-                  button: {
+                  message: 'You' + congrats_message,
+                  buttons: [{
+                    text: 'Share',
+                    bg_color: 'blue',
+                    onClick: onShareGame,
+                    permanent: true
+                  },{
                     text: 'Repeat!',
                     onClick: onRepeatGame,
                     permanent: true
-                  }
+                  }]
                 }
               }else{
-                state.notify = congrats_message;
+                state.notify = player.name + congrats_message;
               }
               state.winner_id = player.id;
             }else if(payload.notify_type == 'player_joined'){
@@ -192,21 +198,21 @@
               player.name = payload.data.player_name;
             } else if(payload.notify_type == 'repeat_game_created') {
               state.notify = {
-                message: 'New game created!',
-                button: {
+                message: 'Again?',
+                buttons: [{
                   text: 'Rejoin!',
                   onClick: function() { location.href = '/games/' + payload.data.game_id; },
                   permanent: true
-                }
+                }]
               }
             }else if(payload.status == 'error'){
               if(payload.data.error == 'game_not_started'){
                 state.notify = {
                   message: 'Game has not started yet! Click',
-                  button: {
+                  buttons: [{
                     text: 'Go!',
                     onClick: onStartGame
-                  }
+                  }]
                 }
               }else{
                 state.notify = payload.data.message;
@@ -260,6 +266,59 @@
             game_id: state.game_id,
             type: 'repeat'
           }));
+        }
+
+        function playerTextPreview(player_name, attempts) {
+          var result = player_name + '\n';
+
+          attempts.forEach(function(attempt) {
+            result += attempt.map(function(match){
+              if(match == 0){
+                return '⬛';
+              } else if(match == 1){
+                return '🟨';
+              }else if(match == 2){
+                return '🟩';
+              }
+            }
+            ).join('')
+            result += '\n';
+          });
+
+          return result;
+        }
+
+        var onShareGame = function(){
+          var total_time  = state.end_game_time - state.start_game_time;
+          var guess_word = state.game.attempts[state.game.attempts.length - 1][0];
+          var share_message = 'I was faster than the others and guessed the word ' + guess_word.toUpperCase() + ' in ' + mm_ss_time_from_milliseconds(total_time);
+
+          share_message += '\n\n';
+
+          var current_player = get_player_by_id(state.player_id);
+          var current_player_attempts = state.game.attempts.map(function(attempt){
+            return attempt[1];
+          })
+          share_message += playerTextPreview(current_player.name, current_player_attempts);
+          share_message += '\n';
+          state.players.forEach(function(player){
+            if(player.id != state.player_id){
+              share_message += playerTextPreview(player.name, player.attempts);
+              share_message += '\n';
+            }
+          })
+          share_message += location.protocol + '//' + location.host;
+          navigator.clipboard.writeText(share_message);
+
+          state.notify = 'Copied to clipboard!';
+          ReactDOM.render(React.createElement(GameBox, {
+                    game: state.game,
+                    onWordSubmit: onWordSubmit,
+                    status: 'online',
+                    game_language: state.dictionary_name,
+                    player_name: localStorage.getItem('player_name'),
+                    onNameSubmit: onNameSubmit,
+                    notify: state.notify}), document.getElementById('game_box'));
         }
 
         var onNameSubmit = function(name) {
