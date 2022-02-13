@@ -47,12 +47,14 @@ describe Controllers::MultiplayerGame do
       it 'sends a success message' do
         subject.run
 
-        expect(connection).to have_received(:send).with({
-          status: 'ok',
-          type: :join,
-          data: {player_id: fake_player_id, players: [], dictionary_name: 'en'},
-          channel: 'test'
-        }.to_json)
+        expect(connection).to have_received(:send) do |message|
+          json_payload = JSON.parse(message, symbolize_names: true)
+          expect(json_payload).to include({status: 'ok',
+                                           type: 'join',
+                                           data: {player_id: fake_player_id, players: [], dictionary_name: 'en', start_time: nil},
+                                           channel: 'test'
+          })
+        end
       end
 
       context 'when player is already in the game' do
@@ -66,12 +68,14 @@ describe Controllers::MultiplayerGame do
         it 'sends a success message' do
           subject.run
 
-          expect(connection).to have_received(:send).with({
-            status: 'ok',
-            type: :join,
-            data: {player_id: existing_player_id, players: [], dictionary_name: 'en'},
-            channel: 'test'
-          }.to_json)
+          expect(connection).to have_received(:send) do |message|
+            json_payload = JSON.parse(message, symbolize_names: true)
+            expect(json_payload).to include({status: 'ok',
+                                             type: 'join',
+                                             data: {player_id: existing_player_id, players: [], dictionary_name: 'en', start_time: nil},
+                                             channel: 'test'
+            })
+          end
         end
       end
     end
