@@ -58,7 +58,7 @@ describe "Wordle", type: :feature do
       Capybara.using_session('player2') do
         find("body").send_keys("plain\n")
 
-        expect(page).to have_content "Wordler 2 won in"
+        expect(page).to have_content "You won in"
       end
 
       Capybara.using_session('player1') do

@@ -162,10 +162,10 @@
               var player = get_player_by_id(payload.data.winner_id);
               state.end_game_time = Date.parse(payload.data.end_time);
               var total_ms = Math.floor(state.end_game_time - state.start_game_time);
-              var congrats_message = player.name + ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
+              var congrats_message = ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
               if(payload.data.winner_id == state.player_id){
                 state.notify = {
-                  message: congrats_message,
+                  message: 'You' + congrats_message,
                   buttons: [{
                     text: 'Share',
                     bg_color: 'blue',
@@ -178,7 +178,7 @@
                   }]
                 }
               }else{
-                state.notify = congrats_message;
+                state.notify = player.name + congrats_message;
               }
               state.winner_id = player.id;
             }else if(payload.notify_type == 'player_joined'){
