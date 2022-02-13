@@ -1,4 +1,5 @@
 require_relative './base'
+require_relative '../multiplayer_game'
 
 module Controllers
   class MultiplayerGame < Base
@@ -82,6 +83,19 @@ module Controllers
       $publisher.publish(game_id, :player_name_updated, {player_id: player_id, player_name: player_name}, conn)
 
       ok(player_id: player_id, player_name: player_name)
+    end
+
+    def repeat
+      game_id = message["game_id"]
+      game = $live_games[game_id]
+
+      return error(:game_not_found) unless game
+
+      new_game_id = SecureRandom.hex(3)
+      $live_games[new_game_id] = ::MultiplayerGame.new(game.dictionary)
+
+      $publisher.publish(game_id, :repeat_game_created, {game_id: new_game_id}, conn)
+      ok(game_id: new_game_id)
     end
 
     private

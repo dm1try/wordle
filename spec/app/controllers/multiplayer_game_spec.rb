@@ -183,5 +183,36 @@ describe Controllers::MultiplayerGame do
         end
       end
     end
+
+    describe '#repeat' do
+      let(:player_id) { '1' }
+      let(:player_name) { 'name' }
+
+      let(:message) {
+        {
+          'type' => 'repeat', 'game_id' => 'game_id', 'channel' => 'test', 'player_id' => player_id
+        }
+      }
+      let(:game) { MultiplayerGame.new(Game::Dictionary::Test.new(['plain'], ['plain'])) }
+
+
+      context 'when the game is ended' do
+        before do
+          $live_games['game_id'] = game
+          game.add_player(player_id, player_name)
+          game.start
+          game.attempt(player_id, 'plain')
+        end
+
+        it 'creates a new one and sends it id' do
+          subject.run
+
+          expect(connection).to have_received(:send) do |response|
+            json_response = JSON.parse(response)
+            expect(json_response['data']['game_id']).to match(/\A\w+\z/)
+          end
+        end
+      end
+    end
   end
 end

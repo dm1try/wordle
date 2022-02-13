@@ -150,6 +150,9 @@
                 var player = get_player_by_id(payload.data.player_id);
                 player.name = payload.data.player_name;
                 localStorage.setItem('player_name', player.name);
+              }else if(payload.type == "repeat"){
+                state.notify = 'New game created!';
+                location.href = '/games/' + payload.data.game_id;
               }
             }else if(payload.notify_type == 'game_started') {
               state.notify = 'The fastest one wins!';
@@ -158,7 +161,18 @@
               var player = get_player_by_id(payload.data.winner_id);
               state.end_game_time = Date.parse(payload.data.end_time);
               var total_ms = Math.floor(state.end_game_time - state.start_game_time);
-              state.notify = player.name + ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
+              var congrats_message = player.name + ' won in ' + mm_ss_time_from_milliseconds(total_ms) + '🏆';
+              if(payload.data.winner_id == state.player_id){
+                state.notify = {
+                  message: congrats_message,
+                  button: {
+                    text: 'Repeat!',
+                    onClick: onRepeatGame
+                  }
+                }
+              }else{
+                state.notify = congrats_message;
+              }
               state.winner_id = player.id;
             }else if(payload.notify_type == 'player_joined'){
               var player = payload.data.player;
@@ -175,6 +189,14 @@
             } else if(payload.notify_type == 'player_name_updated') {
               var player = get_player_by_id(payload.data.player_id);
               player.name = payload.data.player_name;
+            } else if(payload.notify_type == 'repeat_game_created') {
+              state.notify = {
+                message: 'New game created!',
+                button: {
+                  text: 'Rejoin!',
+                  onClick: function() { location.href = '/games/' + payload.data.game_id; }
+                }
+              }
             }else if(payload.status == 'error'){
               if(payload.data.error == 'game_not_started'){
                 state.notify = {
@@ -226,6 +248,15 @@
             player_id: state.player_id,
             game_id: state.game_id,
             type: 'start'
+          }));
+        }
+
+        var onRepeatGame = function() {
+          gameSocket.send(JSON.stringify({
+            channel: 'multiplayer',
+            player_id: state.player_id,
+            game_id: state.game_id,
+            type: 'repeat'
           }));
         }
 
