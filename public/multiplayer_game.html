@@ -167,6 +167,11 @@
                 state.notify = {
                   message: congrats_message,
                   buttons: [{
+                    text: 'Share',
+                    bg_color: 'blue',
+                    onClick: onShareGame,
+                    permanent: true
+                  },{
                     text: 'Repeat!',
                     onClick: onRepeatGame,
                     permanent: true
@@ -262,6 +267,8 @@
             type: 'repeat'
           }));
         }
+
+        var onShareGame = function(){ navigator.clipboard.writeText("I was the fastest!!!"); }
 
         var onNameSubmit = function(name) {
           gameSocket.send(JSON.stringify({
