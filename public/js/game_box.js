@@ -61,7 +61,7 @@ class NotifyBox extends React.Component {
     }
 
     return React.createElement('div', {
-      className: "m-2 border px-4 py-3 rounded relative text-center animation-shake",
+      className: "m-2 border py-3 rounded relative text-center animation-shake",
       role: "alert"
     },
       content
