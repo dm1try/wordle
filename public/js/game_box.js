@@ -26,7 +26,7 @@ class NotifyBox extends React.Component {
       return React.createElement('button', {
         key: 'notify_button' + index,
         onClick: notify_button.onClick,
-        className: "bg-" + button_bg_color + "-600 hover:bg-" + button_bg_color + "-700 text-white font-bold px-1 mx-1 rounded"
+        className: "inline-block bg-" + button_bg_color + "-600 hover:bg-" + button_bg_color + "-700 text-white font-bold px-1 mx-1 rounded"
       },
         notify_button.text
       )
