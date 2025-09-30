@@ -1,5 +1,6 @@
 require_relative './game'
 require 'securerandom'
+require 'time'
 
 class MultiplayerGame
   Player = Struct.new(:id, :name, :attempts)
