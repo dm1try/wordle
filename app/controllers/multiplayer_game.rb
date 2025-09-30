@@ -19,6 +19,9 @@ module Controllers
         player_name = message["player_name"] || "Wordler #{game.players.size + 1}"
         game.add_player(player_id, player_name)
 
+        # Persist game state after adding player
+        $game_repository.save(game_id, game)
+
         $publisher.publish(game_id, :player_joined, {player: {id: player_id, name: player_name}}, conn)
       end
       $publisher.subscribe(game_id, conn)
@@ -37,6 +40,9 @@ module Controllers
 
       game.start
 
+      # Persist game state after starting
+      $game_repository.save(game_id, game)
+
       payload = {start_time: iso8601(game.start_time) }
       $publisher.publish(game_id, :game_started, payload)
 
@@ -52,6 +58,9 @@ module Controllers
       return error(:attempt_word_not_found) unless game.word_available?(message["word"])
 
       player_game = game.attempt(message["player_id"], message["word"])
+
+      # Persist game state after attempt
+      $game_repository.save(game_id, game)
 
       case player_game.status
       when :won, :lost
@@ -80,6 +89,10 @@ module Controllers
       return error(:invalid_name) if !player_name || !player_name.match(/^[a-zA-Zа-яА-Я0-9_]{3,20}$/)
 
       game.update_player_name(player_id, player_name)
+      
+      # Persist game state after name update
+      $game_repository.save(game_id, game)
+      
       $publisher.publish(game_id, :player_name_updated, {player_id: player_id, player_name: player_name}, conn)
 
       ok(player_id: player_id, player_name: player_name)
@@ -92,7 +105,11 @@ module Controllers
       return error(:game_not_found) unless game
 
       new_game_id = SecureRandom.hex(3)
-      $live_games[new_game_id] = ::MultiplayerGame.new(game.dictionary)
+      new_game = ::MultiplayerGame.new(game.dictionary)
+      $live_games[new_game_id] = new_game
+      
+      # Persist new game
+      $game_repository.save(new_game_id, new_game)
 
       $publisher.publish(game_id, :repeat_game_created, {game_id: new_game_id}, conn)
       ok(game_id: new_game_id)
