@@ -17,7 +17,7 @@ https://wordle.dmitry.it
 
 
 ## Development
-Backend: [ruby-tipi](https://github.com/digital-fabric/tipi), Frontend: [React](https://github.com/facebook/react) + [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)
+Backend: [Iodine](https://github.com/boazsegev/iodine), Frontend: [React](https://github.com/facebook/react) + [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)
 
 
 Requirements:
@@ -36,4 +36,4 @@ Requirements:
   ```
 Also, use the setup scripts to populate dictionaries with words [from internet](https://github.com/dm1try/wordle/blob/a9d0babd0711d39ad8fc3f4f9bf8ee9efaa5622a/setup/seed_dictionary.rb#L1-L2).
 
-4. run application locally with `bundle exec tipi app.rb`
+4. run application locally with `bundle exec ruby app.rb`

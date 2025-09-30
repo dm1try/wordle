@@ -6,7 +6,8 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
 # gem "rails"
 
-gem "tipi", "~> 0.45"
+gem "iodine", "~> 0.7"
+gem "rack", "~> 2.2"
 
 group :test do
   gem "rspec", "~> 3.10"

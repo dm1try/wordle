@@ -3,7 +3,7 @@ require_relative '../../../app/game'
 
 describe Controllers::SimpleGame do
   let(:message) { }
-  let(:connection) { double(:connection, send: nil) }
+  let(:connection) { double(:connection, write: nil) }
   let(:publisher) { double(:publisher, subscribe: nil, publish: nil) }
 
   subject { Controllers::SimpleGame.new(connection, message) }
@@ -17,10 +17,10 @@ describe Controllers::SimpleGame do
     context 'when the game is not found' do
       let(:message) { { 'type' => 'join', 'game_id' => 'not_existed', 'channel' => 'test'} }
 
-      it 'sends an error message' do
+      it 'writes an error message' do
         subject.run
 
-        expect(connection).to have_received(:send).with({
+        expect(connection).to have_received(:write).with({
           status: 'error',
           type: :join,
           data: {error: :game_not_found, message: 'Game not found'},
@@ -37,10 +37,10 @@ describe Controllers::SimpleGame do
         $live_games['game_id'] = game
       end
 
-      it 'sends a success message' do
+      it 'writes a success message' do
         subject.run
 
-        expect(connection).to have_received(:send).with({
+        expect(connection).to have_received(:write).with({
           status: 'ok',
           type: :join,
           data: {game: {status: game.status, attempts: game.attempts}},
@@ -57,7 +57,7 @@ describe Controllers::SimpleGame do
       it 'should return an error message' do
         subject.run
 
-        expect(connection).to have_received(:send).with({
+        expect(connection).to have_received(:write).with({
           status: 'error',
           type: :attempt,
           data: {error: :game_not_found, message: 'Game not found'},
@@ -79,7 +79,7 @@ describe Controllers::SimpleGame do
           it 'should return a success message' do
             subject.run
 
-            expect(connection).to have_received(:send).with({
+            expect(connection).to have_received(:write).with({
               status: 'ok',
               type: :attempt,
               data: {attempt_result: :word_not_available},
@@ -94,7 +94,7 @@ describe Controllers::SimpleGame do
         it 'should return a success message' do
           subject.run
 
-          expect(connection).to have_received(:send).with({
+          expect(connection).to have_received(:write).with({
             status: 'ok',
             type: :attempt,
             data: {attempt_result: :won, game: {status: game.status, attempts: game.attempts}},
@@ -109,7 +109,7 @@ describe Controllers::SimpleGame do
         it 'should return a success message' do
           subject.run
 
-          expect(connection).to have_received(:send).with({
+          expect(connection).to have_received(:write).with({
             status: 'ok',
             type: :attempt,
             data: {attempt_result: :lost, game: {status: game.status, attempts: game.attempts}},
@@ -124,7 +124,7 @@ describe Controllers::SimpleGame do
         it 'should return a success message' do
           subject.run
 
-          expect(connection).to have_received(:send).with({
+          expect(connection).to have_received(:write).with({
             status: 'ok',
             type: :attempt,
             data: {attempt_result: :word_found, game: {status: game.status, attempts: game.attempts}},

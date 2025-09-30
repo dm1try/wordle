@@ -1,13 +1,14 @@
-require 'polyphony'
+require 'thread'
 
 class GameUpdatesPublisher
   def initialize
     @updates = Queue.new
     @connections = {}
+    @lock = Mutex.new
   end
 
   def run
-    spin do
+    Thread.new do
       loop do
         game_id, type, payload, initiator = @updates.pop
 
@@ -15,18 +16,20 @@ class GameUpdatesPublisher
 
         puts "PUBLISHING: #{game_id} #{message}\n"
 
-        if @connections[game_id].nil?
-          puts "No connections for game #{game_id}"
-          next
-        end
+        @lock.synchronize do
+          if @connections[game_id].nil?
+            puts "No connections for game #{game_id}"
+            next
+          end
 
-        @connections[game_id].each do |connection|
-          next if connection == initiator
-          begin
-            connection.send(message)
-          rescue => e
-            puts e.message
-            @connections[game_id].delete(connection)
+          @connections[game_id].each do |connection|
+            next if connection == initiator
+            begin
+              connection.write(message)
+            rescue => e
+              puts e.message
+              @connections[game_id].delete(connection)
+            end
           end
         end
       end
@@ -34,13 +37,17 @@ class GameUpdatesPublisher
   end
 
   def subscribe(game_id, connection)
-    @connections[game_id] ||= []
-    @connections[game_id] << connection
+    @lock.synchronize do
+      @connections[game_id] ||= []
+      @connections[game_id] << connection
+    end
   end
 
   def unsubscribe(game_id, connection)
-    @connections[game_id] ||= []
-    @connections[game_id].delete(connection)
+    @lock.synchronize do
+      @connections[game_id] ||= []
+      @connections[game_id].delete(connection)
+    end
   end
 
   def publish(game_id, type, payload, initiator = nil)
