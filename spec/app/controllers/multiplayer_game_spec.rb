@@ -4,7 +4,7 @@ require_relative '../../../app/game/dictionary/test'
 
 describe Controllers::MultiplayerGame do
   let(:message) { }
-  let(:connection) { double(:connection, send: nil) }
+  let(:connection) { double(:connection, write: nil) }
   let(:publisher) { double(:publisher, subscribe: nil, publish: nil) }
 
   subject { described_class.new(connection, message) }
@@ -18,10 +18,10 @@ describe Controllers::MultiplayerGame do
     context 'when the game is not found' do
       let(:message) { { 'type' => 'join', 'game_id' => 'not_existed', 'channel' => 'test'} }
 
-      it 'sends an error message' do
+      it 'writes an error message' do
         subject.run
 
-        expect(connection).to have_received(:send).with({
+        expect(connection).to have_received(:write).with({
           status: 'error',
           type: :join,
           data: {error: :game_not_found, message: 'Game not found'},
@@ -44,10 +44,10 @@ describe Controllers::MultiplayerGame do
         allow(SecureRandom).to receive(:uuid).and_return(fake_player_id)
       end
 
-      it 'sends a success message' do
+      it 'writes a success message' do
         subject.run
 
-        expect(connection).to have_received(:send) do |message|
+        expect(connection).to have_received(:write) do |message|
           json_payload = JSON.parse(message, symbolize_names: true)
           expect(json_payload).to include({status: 'ok',
                                            type: 'join',
@@ -65,10 +65,10 @@ describe Controllers::MultiplayerGame do
           allow(game).to receive(:player_exists?).with(existing_player_id).and_return(true)
         end
 
-        it 'sends a success message' do
+        it 'writes a success message' do
           subject.run
 
-          expect(connection).to have_received(:send) do |message|
+          expect(connection).to have_received(:write) do |message|
             json_payload = JSON.parse(message, symbolize_names: true)
             expect(json_payload).to include({status: 'ok',
                                              type: 'join',
@@ -92,10 +92,10 @@ describe Controllers::MultiplayerGame do
         game.start
       end
 
-      it 'sends players data and game start time in the response' do
+      it 'writes players data and game start time in the response' do
         subject.run
 
-        expect(connection).to have_received(:send) do |response|
+        expect(connection).to have_received(:write) do |response|
           json_response = JSON.parse(response)
           expect(json_response['data']['players']).to eq([{'id' => player_id, 'name' => player_name,
                                                            'attempts' => []}])
@@ -121,7 +121,7 @@ describe Controllers::MultiplayerGame do
       it 'includes player name in the response' do
         subject.run
 
-        expect(connection).to have_received(:send) do |response|
+        expect(connection).to have_received(:write) do |response|
           json_response = JSON.parse(response)
           expect(json_response['data']['players'].first['name']).to eq(player_name)
         end
@@ -149,7 +149,7 @@ describe Controllers::MultiplayerGame do
       it 'updates a player name' do
         subject.run
 
-        expect(connection).to have_received(:send) do |response|
+        expect(connection).to have_received(:write) do |response|
           json_response = JSON.parse(response)
           expect(json_response['data']['player_name']).to eq(new_player_name)
         end
@@ -161,7 +161,7 @@ describe Controllers::MultiplayerGame do
         it 'updates a player name' do
           subject.run
 
-          expect(connection).to have_received(:send) do |response|
+          expect(connection).to have_received(:write) do |response|
             json_response = JSON.parse(response)
             expect(json_response['data']['player_name']).to eq(new_player_name)
           end
@@ -171,10 +171,10 @@ describe Controllers::MultiplayerGame do
       context 'with invalid name' do
         let(:new_player_name) { 'x' }
 
-        it 'sends an error message' do
+        it 'writes an error message' do
           subject.run
 
-          expect(connection).to have_received(:send).with({
+          expect(connection).to have_received(:write).with({
             status: 'error',
             type: :update_name,
             data: {error: :invalid_name, message: 'Invalid name'},
@@ -204,10 +204,10 @@ describe Controllers::MultiplayerGame do
           game.attempt(player_id, 'plain')
         end
 
-        it 'creates a new one and sends it id' do
+        it 'creates a new one and writes it id' do
           subject.run
 
-          expect(connection).to have_received(:send) do |response|
+          expect(connection).to have_received(:write) do |response|
             json_response = JSON.parse(response)
             expect(json_response['data']['game_id']).to match(/\A\w+\z/)
           end
