@@ -1,5 +1,6 @@
 require 'bundler/setup'
 require 'iodine'
+require 'rack'
 require 'json'
 require 'securerandom'
 
@@ -17,8 +18,8 @@ $live_games = {}
 $publisher = GameUpdatesPublisher.new
 $publisher.run
 
-# WebSocket handler class for Iodine
-class WebSocketHandler
+# WebSocket handler module for Iodine
+module WebSocketHandler
   def on_open(client)
     puts "WebSocket connection opened"
   end
@@ -42,6 +43,8 @@ class WebSocketHandler
     puts "WebSocket connection closed"
     # Note: We could track connections here and unsubscribe, but we'll handle that in the publisher
   end
+  
+  extend self
 end
 
 # Rack application
@@ -50,14 +53,14 @@ class App
   MULTIPLAYER_GAME_HTML_PATH = File.join(__dir__, 'public', 'multiplayer_game.html')
 
   def self.call(env)
-    request = Rack::Request.new(env)
-    path = request.path_info
-
     # Handle WebSocket upgrade
-    if request.get_header('HTTP_UPGRADE')&.downcase == 'websocket'
-      env['iodine.websocket'] = WebSocketHandler.new
+    if env['rack.upgrade?'.freeze] == :websocket
+      env['rack.upgrade'.freeze] = WebSocketHandler
       return [0, {}, []]
     end
+
+    request = Rack::Request.new(env)
+    path = request.path_info
 
     # Handle root path
     if path == '/'
