@@ -43,9 +43,9 @@ task :setup do
   command %{gem install bundler}
 end
 
-task :tipi_restart do
-  #command %{killall rub} # :)
-  command %{bundle exec tipi server.rb}
+task :app_restart do
+  #command %{killall ruby} # :)
+  command %{bundle exec ruby app.rb}
 end
 
 desc "Deploys the current version to the server."
@@ -62,7 +62,7 @@ task :deploy do
 
     on :launch do
       in_path(fetch(:current_path)) do
-      #  invoke :tipi_restart
+      #  invoke :app_restart
       end
     end
   end

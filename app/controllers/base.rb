@@ -29,7 +29,7 @@ module Controllers
     def send_data(data)
       data["channel"] = @channel
       json_data = JSON.generate(data)
-      @conn.send(json_data)
+      @conn.write(json_data)
     end
   end
 end
