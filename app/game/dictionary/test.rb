@@ -3,9 +3,10 @@ require_relative 'base'
 class Game
   module Dictionary
     class Test < Base
-      def initialize(target_words, available_words)
+      def initialize(target_words, available_words, name = 'test')
         @target_words = target_words
         @available_words = available_words
+        @name = name
       end
 
       def target_words

@@ -83,6 +83,9 @@ class Game
     dictionary_name = hash['dictionary_name']
     if dictionary_name == 'en'
       dictionary = Game::Dictionary::Redis.new($redis, 'words_en', 'available_words_en', 'en')
+    elsif dictionary_name == 'test'
+      require_relative './game/dictionary/test'
+      dictionary = Game::Dictionary::Test.new(['plain'], ['plain'], 'test')
     else
       dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words', 'ru')
     end
