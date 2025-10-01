@@ -25,6 +25,9 @@ module Controllers
       begin
         game.attempt(word)
 
+        # Persist game state
+        $game_repository.save(game_id, game)
+
         case game.status
         when :won
           ok(attempt_result: :won, game: {status: game.status, attempts: game.attempts})

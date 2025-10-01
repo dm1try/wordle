@@ -13,8 +13,10 @@ require_relative './app/controllers/multiplayer_game'
 
 require_relative './db'
 require_relative './app/game_updates_publisher'
+require_relative './app/game_repository'
 
 $live_games = {}
+$game_repository = GameRepository.new($redis)
 $publisher = GameUpdatesPublisher.new
 $publisher.run
 
@@ -93,12 +95,15 @@ class App
       game_dictionary = Game::Dictionary::Redis.new($redis, guesses_set_name,
                                                     available_words_set_name, dictionary_name)
 
-      $live_games[game_id] =
+      game = 
         if request.params['mode'] == 'time_competition'
           MultiplayerGame.new(game_dictionary)
         else
           Game.new(game_dictionary)
         end
+
+      $live_games[game_id] = game
+      $game_repository.save(game_id, game)
 
       return [302, {'Location' => "/games/#{game_id}"}, []]
     end
@@ -107,14 +112,22 @@ class App
     if path.start_with?('/games/')
       game_id = path.split('/').last
 
-      case $live_games[game_id]
-      when Game
-        return serve_file(GAME_HTML_PATH)
-      when MultiplayerGame
-        return serve_file(MULTIPLAYER_GAME_HTML_PATH)
-      else
-        return [302, {'Location' => '/'}, []]
+      # Try to load from memory first, then from Redis
+      game = $live_games[game_id] || $game_repository.load(game_id)
+
+      if game
+        # Cache in memory if loaded from Redis
+        $live_games[game_id] = game unless $live_games[game_id]
+
+        case game
+        when Game
+          return serve_file(GAME_HTML_PATH)
+        when MultiplayerGame
+          return serve_file(MULTIPLAYER_GAME_HTML_PATH)
+        end
       end
+
+      return [302, {'Location' => '/'}, []]
     end
 
     # 404 Not Found

@@ -11,6 +11,7 @@ describe Controllers::SimpleGame do
   before do
     $live_games = {}
     $publisher = publisher
+    $game_repository = double(:game_repository, save: nil, load: nil)
   end
 
   describe '#join' do

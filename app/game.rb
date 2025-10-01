@@ -66,5 +66,34 @@ class Game
   def last_match
     @attempts.last[1]
   end
+
+  def to_h
+    {
+      type: 'Game',
+      word: @word,
+      attempts: @attempts,
+      status: @status.to_s,
+      dictionary_name: @dictionary.name
+    }
+  end
+
+  def self.from_h(hash)
+    require_relative './game/dictionary/redis'
+    
+    dictionary_name = hash['dictionary_name']
+    if dictionary_name == 'en'
+      dictionary = Game::Dictionary::Redis.new($redis, 'words_en', 'available_words_en', 'en')
+    elsif dictionary_name == 'test'
+      require_relative './game/dictionary/test'
+      dictionary = Game::Dictionary::Test.new(['plain'], ['plain'], 'test')
+    else
+      dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words', 'ru')
+    end
+    
+    game = new(dictionary, hash['word'])
+    game.instance_variable_set(:@attempts, hash['attempts'])
+    game.instance_variable_set(:@status, hash['status'].to_sym)
+    game
+  end
 end
 

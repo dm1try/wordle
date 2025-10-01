@@ -1,5 +1,6 @@
 require_relative './game'
 require 'securerandom'
+require 'time'
 
 class MultiplayerGame
   Player = Struct.new(:id, :name, :attempts)
@@ -87,5 +88,58 @@ class MultiplayerGame
 
   def winner_name
     @winner.name
+  end
+
+  def to_h
+    {
+      type: 'MultiplayerGame',
+      dictionary_name: @dictionary.name,
+      players: @players.map { |p| { id: p.id, name: p.name, attempts: p.attempts } },
+      games: @games.transform_values { |game| game.to_h },
+      start_time: @start_time&.iso8601,
+      end_time: @end_time&.iso8601,
+      winner_id: @winner&.id
+    }
+  end
+
+  def self.from_h(hash)
+    require_relative './game/dictionary/redis'
+    
+    dictionary_name = hash['dictionary_name']
+    if dictionary_name == 'en'
+      dictionary = Game::Dictionary::Redis.new($redis, 'words_en', 'available_words_en', 'en')
+    elsif dictionary_name == 'test'
+      require_relative './game/dictionary/test'
+      dictionary = Game::Dictionary::Test.new(['plain'], ['plain'], 'test')
+    else
+      dictionary = Game::Dictionary::Redis.new($redis, 'words', 'available_words', 'ru')
+    end
+    
+    game = new(dictionary)
+    
+    # Restore players
+    hash['players'].each do |player_data|
+      player = Player.new(player_data['id'], player_data['name'], player_data['attempts'])
+      game.instance_variable_get(:@players) << player
+    end
+    
+    # Restore games
+    games = {}
+    hash['games'].each do |player_id, game_data|
+      games[player_id] = Game.from_h(game_data)
+    end
+    game.instance_variable_set(:@games, games)
+    
+    # Restore timestamps
+    game.instance_variable_set(:@start_time, hash['start_time'] ? Time.parse(hash['start_time']) : nil)
+    game.instance_variable_set(:@end_time, hash['end_time'] ? Time.parse(hash['end_time']) : nil)
+    
+    # Restore winner
+    if hash['winner_id']
+      winner = game.instance_variable_get(:@players).find { |p| p.id == hash['winner_id'] }
+      game.instance_variable_set(:@winner, winner)
+    end
+    
+    game
   end
 end
