@@ -14,7 +14,7 @@ class NotifyBox extends React.Component {
     var newState = {};
     var hasChanges = false;
 
-    if (props.notify.buttons) {
+    if (typeof(props.notify) == 'object' && props.notify.buttons) {
       var permanent_buttons = props.notify.buttons.filter(function(button){
         return button.permanent
       })
