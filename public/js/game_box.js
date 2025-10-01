@@ -2,21 +2,70 @@ class NotifyBox extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      permanent_buttons: null
+      permanent_buttons: null,
+      showTimer: false,
+      currentTime: Date.now(),
+      messageTimestamp: null
     }
+    this.timerInterval = null;
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.notify.buttons) {
+    var newState = {};
+    var hasChanges = false;
+
+    if (typeof(props.notify) == 'object' && props.notify.buttons) {
       var permanent_buttons = props.notify.buttons.filter(function(button){
         return button.permanent
       })
 
       if (permanent_buttons.length > 0) {
-        return {permanent_buttons: permanent_buttons}
+        newState.permanent_buttons = permanent_buttons;
+        hasChanges = true;
       }
     }
-    return null;
+
+    // If notify message changed, reset timer visibility and set timestamp
+    var currentNotifyStr = typeof(props.notify) == 'object' ? props.notify.message : props.notify;
+    var prevNotifyStr = state.prevNotify;
+
+    if (currentNotifyStr !== prevNotifyStr && currentNotifyStr) {
+      newState.showTimer = false;
+      newState.messageTimestamp = Date.now();
+      newState.prevNotify = currentNotifyStr;
+      hasChanges = true;
+    }
+
+    return hasChanges ? newState : null;
+  }
+
+  componentDidMount() {
+    this.timerInterval = setInterval(() => {
+      var newState = { currentTime: Date.now() };
+
+      // Switch to timer after 3 seconds of showing message
+      if (this.state.messageTimestamp &&
+          this.props.start_game_time &&
+          !this.state.showTimer &&
+          (Date.now() - this.state.messageTimestamp) > 3000) {
+        newState.showTimer = true;
+      }
+
+      this.setState(newState);
+    }, 100);
+  }
+
+  componentWillUnmount() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+  }
+
+  formatTime(milliseconds) {
+    var seconds = Math.floor(milliseconds / 1000);
+    var minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
   }
 
   renderNotifyWithButtons(notify_message, notify_buttons){
@@ -45,7 +94,13 @@ class NotifyBox extends React.Component {
   render(){
     var content = null;
 
-    if (typeof(this.props.notify) == 'object') {
+    // Show timer if game started, no recent message, and no permanent buttons
+    if (this.state.showTimer &&
+        this.props.start_game_time &&
+        !this.state.permanent_buttons) {
+      var elapsed = this.state.currentTime - this.props.start_game_time;
+      content = this.formatTime(elapsed);
+    } else if (typeof(this.props.notify) == 'object') {
       content =  this.renderNotifyWithButtons(this.props.notify.message, this.props.notify.buttons);
     }else if(this.state.permanent_buttons != null){
       content = this.renderNotifyWithButtons(this.props.notify, this.state.permanent_buttons);
@@ -264,7 +319,8 @@ class GameBox extends React.Component {
         warning_letters: this.notFoundLetters(),
       }),
       React.createElement(NotifyBox, {
-        notify: this.props.notify || this.statusDescription()
+        notify: this.props.notify || this.statusDescription(),
+        start_game_time: this.props.start_game_time
       }),
       React.createElement(Keyboard, {
         rows: this.keyboardLayout(),

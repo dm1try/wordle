@@ -97,6 +97,7 @@
               game: state.game,
               onWordSubmit: onWordSubmit,
               game_language: state.dictionary_name,
+              start_game_time: state.start_game_time,
               status: 'offline',
               notify_message: 'Disconnected'}), document.getElementById('game_box')
             )
@@ -226,6 +227,7 @@
                         game_language: state.dictionary_name,
                         player_name: localStorage.getItem('player_name'),
                         onNameSubmit: onNameSubmit,
+                        start_game_time: state.start_game_time,
                         notify: state.notify}), document.getElementById('game_box'));
 
               ReactDOM.render(React.createElement(PlayersList, {
@@ -318,6 +320,7 @@
                     game_language: state.dictionary_name,
                     player_name: localStorage.getItem('player_name'),
                     onNameSubmit: onNameSubmit,
+                    start_game_time: state.start_game_time,
                     notify: state.notify}), document.getElementById('game_box'));
         }
 
@@ -337,6 +340,7 @@
           game_language: state.dictionary_name,
           player_name: localStorage.getItem('player_name'),
           onNameSubmit: onNameSubmit,
+          start_game_time: state.start_game_time,
           status: 'offline'}), document.getElementById('game_box'));
 
         gameSocket = connect();
