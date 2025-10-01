@@ -182,6 +182,7 @@
                 // Store the word for losing player
                 state.target_word = payload.data.word;
                 state.show_word_time = Date.now() + 3000; // Show button after 3 seconds
+                state.show_word_button_ready = false; // Flag to track if button is ready to show
                 state.notify = player.name + congrats_message;
               }
               state.winner_id = player.id;
@@ -356,28 +357,28 @@
 
         // Check periodically if it's time to show the "Show the word!" button
         setInterval(function() {
-          if (state.show_word_time && Date.now() >= state.show_word_time && state.winner_id != state.player_id) {
-            if (typeof(state.notify) === 'string') {
-              state.notify = {
-                message: state.notify,
-                buttons: [{
-                  text: 'Show the word!',
-                  bg_color: 'blue',
-                  onClick: onRevealWord
-                }]
-              };
-              state.show_word_time = null; // Clear the timer
-              ReactDOM.render(React.createElement(GameBox, {
-                game: state.game,
-                onWordSubmit: onWordSubmit,
-                status: 'online',
-                game_language: state.dictionary_name,
-                player_name: localStorage.getItem('player_name'),
-                onNameSubmit: onNameSubmit,
-                start_game_time: state.start_game_time,
-                notify: state.notify
-              }), document.getElementById('game_box'));
-            }
+          if (state.show_word_time && Date.now() >= state.show_word_time && 
+              state.winner_id != state.player_id && !state.show_word_button_ready) {
+            state.show_word_button_ready = true;
+            state.notify = {
+              message: typeof(state.notify) === 'string' ? state.notify : (state.notify.message || ''),
+              buttons: [{
+                text: 'Show the word!',
+                bg_color: 'blue',
+                onClick: onRevealWord
+              }]
+            };
+            state.show_word_time = null; // Clear the timer
+            ReactDOM.render(React.createElement(GameBox, {
+              game: state.game,
+              onWordSubmit: onWordSubmit,
+              status: 'online',
+              game_language: state.dictionary_name,
+              player_name: localStorage.getItem('player_name'),
+              onNameSubmit: onNameSubmit,
+              start_game_time: state.start_game_time,
+              notify: state.notify
+            }), document.getElementById('game_box'));
           }
         }, 100);
 
