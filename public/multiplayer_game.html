@@ -179,6 +179,9 @@
                   }]
                 }
               }else{
+                // Store the word for losing player
+                state.target_word = payload.data.word;
+                state.show_word_time = Date.now() + 3000; // Show button after 3 seconds
                 state.notify = player.name + congrats_message;
               }
               state.winner_id = player.id;
@@ -333,6 +336,50 @@
             player_name: name
           }));
         }
+
+        var onRevealWord = function() {
+          state.notify = {
+            message: 'The word was: ' + state.target_word.toUpperCase(),
+            buttons: []
+          };
+          ReactDOM.render(React.createElement(GameBox, {
+            game: state.game,
+            onWordSubmit: onWordSubmit,
+            status: 'online',
+            game_language: state.dictionary_name,
+            player_name: localStorage.getItem('player_name'),
+            onNameSubmit: onNameSubmit,
+            start_game_time: state.start_game_time,
+            notify: state.notify
+          }), document.getElementById('game_box'));
+        }
+
+        // Check periodically if it's time to show the "Show the word!" button
+        setInterval(function() {
+          if (state.show_word_time && Date.now() >= state.show_word_time && state.winner_id != state.player_id) {
+            if (typeof(state.notify) === 'string') {
+              state.notify = {
+                message: state.notify,
+                buttons: [{
+                  text: 'Show the word!',
+                  bg_color: 'blue',
+                  onClick: onRevealWord
+                }]
+              };
+              state.show_word_time = null; // Clear the timer
+              ReactDOM.render(React.createElement(GameBox, {
+                game: state.game,
+                onWordSubmit: onWordSubmit,
+                status: 'online',
+                game_language: state.dictionary_name,
+                player_name: localStorage.getItem('player_name'),
+                onNameSubmit: onNameSubmit,
+                start_game_time: state.start_game_time,
+                notify: state.notify
+              }), document.getElementById('game_box'));
+            }
+          }
+        }, 100);
 
         ReactDOM.render(React.createElement(GameBox, {
           game: state.game,
