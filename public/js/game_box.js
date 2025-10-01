@@ -28,7 +28,7 @@ class NotifyBox extends React.Component {
     // If notify message changed, reset timer visibility and set timestamp
     var currentNotifyStr = typeof(props.notify) == 'object' ? props.notify.message : props.notify;
     var prevNotifyStr = state.prevNotify;
-    
+
     if (currentNotifyStr !== prevNotifyStr && currentNotifyStr) {
       newState.showTimer = false;
       newState.messageTimestamp = Date.now();
@@ -42,15 +42,15 @@ class NotifyBox extends React.Component {
   componentDidMount() {
     this.timerInterval = setInterval(() => {
       var newState = { currentTime: Date.now() };
-      
+
       // Switch to timer after 3 seconds of showing message
-      if (this.state.messageTimestamp && 
-          this.props.start_game_time && 
+      if (this.state.messageTimestamp &&
+          this.props.start_game_time &&
           !this.state.showTimer &&
           (Date.now() - this.state.messageTimestamp) > 3000) {
         newState.showTimer = true;
       }
-      
+
       this.setState(newState);
     }, 100);
   }
@@ -95,14 +95,11 @@ class NotifyBox extends React.Component {
     var content = null;
 
     // Show timer if game started, no recent message, and no permanent buttons
-    if (this.state.showTimer && 
-        this.props.start_game_time && 
+    if (this.state.showTimer &&
+        this.props.start_game_time &&
         !this.state.permanent_buttons) {
       var elapsed = this.state.currentTime - this.props.start_game_time;
-      var timeStr = this.formatTime(elapsed);
-      content = React.createElement('div', {
-        className: "text-2xl font-bold"
-      }, timeStr);
+      content = this.formatTime(elapsed);
     } else if (typeof(this.props.notify) == 'object') {
       content =  this.renderNotifyWithButtons(this.props.notify.message, this.props.notify.buttons);
     }else if(this.state.permanent_buttons != null){
