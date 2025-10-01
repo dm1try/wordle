@@ -94,8 +94,10 @@ class NotifyBox extends React.Component {
   render(){
     var content = null;
 
-    // Show timer if game started and no recent message
-    if (this.state.showTimer && this.props.start_game_time) {
+    // Show timer if game started, no recent message, and no permanent buttons
+    if (this.state.showTimer && 
+        this.props.start_game_time && 
+        !this.state.permanent_buttons) {
       var elapsed = this.state.currentTime - this.props.start_game_time;
       var timeStr = this.formatTime(elapsed);
       content = React.createElement('div', {
