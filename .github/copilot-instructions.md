@@ -3,7 +3,7 @@
 ## Project Overview
 
 This is a multiplayer Wordle game with time competition between players. The project uses:
-- **Backend**: Ruby with [Tipi web server](https://github.com/digital-fabric/tipi)
+- **Backend**: Ruby with [Iodine web server](https://github.com/boazsegev/iodine)
 - **Frontend**: React + Tailwind CSS
 - **Database**: Redis
 - **Testing**: RSpec with Capybara for integration tests
@@ -20,7 +20,7 @@ This is a multiplayer Wordle game with time competition between players. The pro
 3. Prepare test database: `APP_ENV=test REDIS_URL=redis://localhost:6379/2 bundle exec ruby setup/prepare_test_db.rb`
 4. Run tests: `bundle exec rspec`
 5. Seed dictionaries using `setup/seed_dictionary.rb` script
-6. Start server: `bundle exec tipi app.rb` (default port 1234)
+6. Start server: `bundle exec ruby app.rb` (default port 1234)
 
 ## Code Style & Conventions
 
@@ -67,7 +67,7 @@ This is a multiplayer Wordle game with time competition between players. The pro
 - Two types of sets: valid guesses (`words`) and available words for solutions (`available_words`)
 
 ### Routing
-- Main router in `app.rb` using Tipi routing
+- Main router in `app.rb` using Rack-based routing with Iodine
 - Static files served from `public/`
 - WebSocket handler for game interactions
 - Game creation at `/new` endpoint
