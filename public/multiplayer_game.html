@@ -46,6 +46,7 @@
           state = {
             game_id: game_id,
             player_id: null,
+            host_id: null,
             game: {attempts: [], status: 'in_progress'},
             status: 'offline',
             notify: '',
@@ -118,6 +119,7 @@
               if(payload.type == "join") {
                 state.players =  payload.data.players;
                 state.player_id = payload.data.player_id;
+                state.host_id = payload.data.host_id;
                 state.dictionary_name = payload.data.dictionary_name;
                 if(payload.data.start_time) {
                   state.start_game_time = Date.parse(payload.data.start_time);
@@ -125,12 +127,17 @@
                 if(state.start_game_time){
                   state.notify = "You are reconnected!";
                 }else{
-                  state.notify = {
-                    message: 'Share, wait for everyone and click',
-                    buttons: [{
-                      text: 'Go!',
-                      onClick: onStartGame
-                    }]
+                  // Only show "Go!" button to the host
+                  if(state.player_id === state.host_id) {
+                    state.notify = {
+                      message: 'Share, wait for everyone and click',
+                      buttons: [{
+                        text: 'Go!',
+                        onClick: onStartGame
+                      }]
+                    }
+                  } else {
+                    state.notify = 'Waiting for the host to start the game...';
                   }
                 };
                 // TODO: use server side rendering
@@ -219,6 +226,8 @@
                     onClick: onStartGame
                   }]
                 }
+              }else if(payload.data.error == 'only_host_can_start'){
+                state.notify = 'Only the host can start the game!';
               }else{
                 state.notify = payload.data.message;
               }

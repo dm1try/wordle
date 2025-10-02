@@ -28,7 +28,7 @@ module Controllers
 
       players = game.players.map { |p| {id: p.id, name: p.name, attempts: p.attempts} }
       start_time = iso8601(game.start_time) if game.started?
-      ok(player_id: player_id, players: players, dictionary_name: game.dictionary.name, start_time: start_time)
+      ok(player_id: player_id, players: players, dictionary_name: game.dictionary.name, start_time: start_time, host_id: game.host_id)
     end
 
     def start
@@ -37,6 +37,9 @@ module Controllers
 
       return error(:game_not_found) unless game
       return error(:game_already_started) if game.started?
+      
+      player_id = message["player_id"]
+      return error(:only_host_can_start) unless game.host_id == player_id
 
       game.start
 

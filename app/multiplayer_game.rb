@@ -5,18 +5,20 @@ require 'time'
 class MultiplayerGame
   Player = Struct.new(:id, :name, :attempts)
 
-  attr_reader :start_time, :end_time, :players, :dictionary, :winner
+  attr_reader :start_time, :end_time, :players, :dictionary, :winner, :host_id
 
   def initialize(dictionary)
     @dictionary = dictionary
     @players = []
     @games = {}
     @winner = nil
+    @host_id = nil
   end
 
   def add_player(id, name)
     return false if started?
     @players << Player.new(id, name, [])
+    @host_id ||= id
   end
 
   def remove_player(id)
@@ -98,7 +100,8 @@ class MultiplayerGame
       games: @games.transform_values { |game| game.to_h },
       start_time: @start_time&.iso8601,
       end_time: @end_time&.iso8601,
-      winner_id: @winner&.id
+      winner_id: @winner&.id,
+      host_id: @host_id
     }
   end
 
@@ -139,6 +142,9 @@ class MultiplayerGame
       winner = game.instance_variable_get(:@players).find { |p| p.id == hash['winner_id'] }
       game.instance_variable_set(:@winner, winner)
     end
+    
+    # Restore host_id
+    game.instance_variable_set(:@host_id, hash['host_id'])
     
     game
   end
