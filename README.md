@@ -34,6 +34,12 @@ Requirements:
   127.0.0.1:6379> SADD words_en plain
   127.0.0.1:6379> SADD available_words_en plain 
   ```
+  **Dictionary Sets Explanation:**
+  - `words_en` - contains words that can be used as solutions (the word the player needs to guess)
+  - `available_words_en` - contains all valid words that can be used for guessing attempts (for validation)
+  
+  The same applies to other language dictionaries (e.g., `words` and `available_words` for Russian).
+
 Also, use the setup scripts to populate dictionaries with words [from internet](https://github.com/dm1try/wordle/blob/a9d0babd0711d39ad8fc3f4f9bf8ee9efaa5622a/setup/seed_dictionary.rb#L1-L2).
 
 4. run application locally with `bundle exec ruby app.rb`
