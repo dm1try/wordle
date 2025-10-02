@@ -215,5 +215,36 @@ describe Controllers::MultiplayerGame do
         end
       end
     end
+
+    describe '#attempt' do
+      let(:player_id) { '1' }
+      let(:player_name) { 'player1' }
+
+      let(:message) {
+        {
+          'type' => 'attempt', 'game_id' => 'game_id', 'channel' => 'test',
+          'player_id' => player_id, 'word' => 'plain'
+        }
+      }
+      let(:game) { MultiplayerGame.new(Game::Dictionary::Test.new(['plain'], ['plain'])) }
+
+      context 'when player wins' do
+        before do
+          $live_games['game_id'] = game
+          game.add_player(player_id, player_name)
+          game.start
+        end
+
+        it 'publishes game_ended event with the word' do
+          subject.run
+
+          expect(publisher).to have_received(:publish).with(
+            'game_id',
+            :game_ended,
+            hash_including(winner_id: player_id, word: 'plain')
+          )
+        end
+      end
+    end
   end
 end

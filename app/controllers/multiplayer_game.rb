@@ -73,7 +73,8 @@ module Controllers
       end
 
       if game.ended?
-        $publisher.publish(game_id, :game_ended, winner_id: game.winner.id, end_time: iso8601(game.end_time))
+        winner_game = game.player_game(game.winner.id)
+        $publisher.publish(game_id, :game_ended, winner_id: game.winner.id, end_time: iso8601(game.end_time), word: winner_game.word)
       end
     end
 
