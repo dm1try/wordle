@@ -34,7 +34,7 @@ describe Controllers::MultiplayerGame do
     context 'when the game is found' do
       let(:message) { { 'type' => 'join', 'game_id' => 'game_id', 'channel' => 'test'} }
       let(:game) { instance_double(MultiplayerGame, add_player: nil, players: [],
-                                   started?: false, player_exists?: false, dictionary: double(name: 'en')) }
+                                   started?: false, player_exists?: false, dictionary: double(name: 'en'), host_id: fake_player_id) }
       let(:fake_player_id) { 'fake_uuid' }
 
       before do
@@ -52,7 +52,7 @@ describe Controllers::MultiplayerGame do
           json_payload = JSON.parse(message, symbolize_names: true)
           expect(json_payload).to include({status: 'ok',
                                            type: 'join',
-                                           data: {player_id: fake_player_id, players: [], dictionary_name: 'en', start_time: nil},
+                                           data: {player_id: fake_player_id, players: [], dictionary_name: 'en', start_time: nil, host_id: fake_player_id},
                                            channel: 'test'
           })
         end
@@ -73,7 +73,7 @@ describe Controllers::MultiplayerGame do
             json_payload = JSON.parse(message, symbolize_names: true)
             expect(json_payload).to include({status: 'ok',
                                              type: 'join',
-                                             data: {player_id: existing_player_id, players: [], dictionary_name: 'en', start_time: nil},
+                                             data: {player_id: existing_player_id, players: [], dictionary_name: 'en', start_time: nil, host_id: fake_player_id},
                                              channel: 'test'
             })
           end
@@ -212,6 +212,74 @@ describe Controllers::MultiplayerGame do
             json_response = JSON.parse(response)
             expect(json_response['data']['game_id']).to match(/\A\w+\z/)
           end
+        end
+      end
+    end
+
+    describe '#start' do
+      let(:host_id) { 'host_player_id' }
+      let(:non_host_id) { 'other_player_id' }
+      let(:game) { MultiplayerGame.new(Game::Dictionary::Test.new(['plain'], ['plain'])) }
+
+      before do
+        $live_games['game_id'] = game
+        game.add_player(host_id, 'Host Player')
+        game.add_player(non_host_id, 'Other Player')
+      end
+
+      context 'when the host starts the game' do
+        let(:message) {
+          {
+            'type' => 'start', 'game_id' => 'game_id', 'channel' => 'test',
+            'player_id' => host_id
+          }
+        }
+
+        it 'successfully starts the game' do
+          subject.run
+
+          expect(connection).to have_received(:write) do |response|
+            json_response = JSON.parse(response)
+            expect(json_response['status']).to eq('ok')
+            expect(json_response['type']).to eq('start')
+            expect(json_response['data']['start_time']).not_to be_nil
+          end
+        end
+
+        it 'publishes game_started event' do
+          subject.run
+
+          expect(publisher).to have_received(:publish).with(
+            'game_id',
+            :game_started,
+            hash_including(:start_time)
+          )
+        end
+      end
+
+      context 'when a non-host player tries to start the game' do
+        let(:message) {
+          {
+            'type' => 'start', 'game_id' => 'game_id', 'channel' => 'test',
+            'player_id' => non_host_id
+          }
+        }
+
+        it 'returns an error' do
+          subject.run
+
+          expect(connection).to have_received(:write).with({
+            status: 'error',
+            type: :start,
+            data: {error: :only_host_can_start, message: 'Only host can start'},
+            channel: 'test'
+          }.to_json)
+        end
+
+        it 'does not start the game' do
+          subject.run
+
+          expect(game.started?).to be false
         end
       end
     end
