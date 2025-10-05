@@ -35,6 +35,9 @@ cd wordle
 
 # Start the application with docker compose
 docker compose up
+
+# Or use the Makefile for convenience
+make up
 ```
 
 The first run will:
@@ -44,9 +47,33 @@ The first run will:
 - Initialize dictionaries with starter words
 - Start the application on http://localhost:1234
 
+**Using Makefile (Optional):**
+A Makefile is provided for convenience:
+```bash
+make help          # Show all available commands
+make up            # Start development environment
+make up-d          # Start in background
+make down          # Stop services
+make logs          # View logs
+make test          # Run tests
+make shell         # Access app container
+make redis-cli     # Access Redis CLI
+make clean         # Clean up everything
+```
+
 **Run tests:**
 ```bash
 docker compose run --rm app bash -c "APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
+```
+
+**Seed full dictionaries:**
+The initial setup includes only starter words. To populate full dictionaries from the internet:
+```bash
+# For English words
+docker compose run --rm app bundle exec ruby setup/seed_dictionary.rb "https://example.com/wordlist" "css-selector" "words_en"
+
+# For Russian words  
+docker compose run --rm app bundle exec ruby setup/seed_dictionary.rb "https://example.com/wordlist" "css-selector" "words"
 ```
 
 **Production deployment:**
