@@ -1,0 +1,42 @@
+# Version control
+.git
+.github
+.gitignore
+
+# Documentation (not needed in production image)
+docs
+wwwordle.png
+README.md
+
+# Test files
+.rspec
+spec
+
+# Temporary files
+tmp
+log
+*.log
+.byebug_history
+
+# Dependencies (will be installed in container)
+.bundle
+vendor/bundle
+
+# Coverage reports
+coverage
+
+# Environment files
+.env
+
+# Docker files (not needed inside the image)
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile
+.dockerignore
+
+# Deployment config (for mina deployment, not docker)
+config/deploy.rb
+
+# Development files
+Makefile
+.env.example

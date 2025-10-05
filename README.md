@@ -19,9 +19,81 @@ https://wordle.dmitry.it
 ## Development
 Backend: [Iodine](https://github.com/boazsegev/iodine), Frontend: [React](https://github.com/facebook/react) + [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)
 
+### Using Docker (Recommended)
+
+The easiest way to get started is using Docker. For detailed Docker documentation, see [docs/DOCKER.md](docs/DOCKER.md).
+
+**Requirements:**
+- Docker
+- Docker Compose
+
+**Quick Start:**
+```bash
+# Clone the repository
+git clone https://github.com/dm1try/wordle.git
+cd wordle
+
+# Start the application with docker compose
+docker compose up
+
+# Or use the Makefile for convenience
+make up
+```
+
+The first run will:
+- Build the Docker image
+- Start Redis
+- Install dependencies
+- Initialize dictionaries with starter words
+- Start the application on http://localhost:1234
+
+**Using Makefile (Optional):**
+A Makefile is provided for convenience:
+```bash
+make help          # Show all available commands
+make up            # Start development environment
+make up-d          # Start in background
+make down          # Stop services
+make logs          # View logs
+make test          # Run tests
+make shell         # Access app container
+make redis-cli     # Access Redis CLI
+make clean         # Clean up everything
+```
+
+**Run tests:**
+```bash
+# Using make (recommended)
+make test
+
+# Or directly with docker compose
+docker compose run --rm app bash -c "bundle config unset without && bundle config set --local without 'development' && bundle install && APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
+```
+
+**Seed full dictionaries:**
+The initial setup includes only starter words. To populate full dictionaries from the internet:
+```bash
+# For English words
+docker compose run --rm app bundle exec ruby setup/seed_dictionary.rb "https://example.com/wordlist" "css-selector" "words_en"
+
+# For Russian words  
+docker compose run --rm app bundle exec ruby setup/seed_dictionary.rb "https://example.com/wordlist" "css-selector" "words"
+```
+
+**Production deployment:**
+```bash
+# Using docker-compose.prod.yml
+docker compose -f docker-compose.prod.yml up -d
+
+# Or using standalone Docker
+docker build -t wordle .
+docker run -d -p 1234:1234 -e REDIS_URL=redis://your-redis-host:6379 wordle
+```
+
+### Manual Setup (Without Docker)
 
 Requirements:
- - ruby
+ - ruby (2.7.5)
  - redis
 
 0. clone repo
