@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1234:1234"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=1234
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: >
+      bash -c "
+      bundle install &&
+      bundle exec ruby setup/init_dictionaries.rb &&
+      bundle exec ruby app.rb
+      "
+
+volumes:
+  redis_data:
+  bundle_cache:
