@@ -7,7 +7,10 @@ RUN apt-get update -qq && \
     build-essential \
     git \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    redis-tools \
+    && rm -rf /var/lib/apt/lists/* && \
+    update-ca-certificates
 
 # Set working directory
 WORKDIR /app
@@ -15,14 +18,21 @@ WORKDIR /app
 # Copy Gemfile and Gemfile.lock
 COPY Gemfile Gemfile.lock ./
 
-# Install Ruby dependencies
-RUN bundle install --without development test
+# Configure bundler and install dependencies
+RUN bundle config set --local without 'development test' && \
+    bundle install
 
 # Copy application code
 COPY . .
 
+# Make entrypoint script executable
+RUN chmod +x docker-entrypoint.sh
+
 # Expose port
 EXPOSE 1234
+
+# Set entrypoint
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Start the application
 CMD ["bundle", "exec", "ruby", "app.rb"]

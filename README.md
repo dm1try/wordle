@@ -33,8 +33,8 @@ The easiest way to get started is using Docker:
 git clone https://github.com/dm1try/wordle.git
 cd wordle
 
-# Start the application with docker-compose
-docker-compose up
+# Start the application with docker compose
+docker compose up
 ```
 
 The first run will:
@@ -46,11 +46,15 @@ The first run will:
 
 **Run tests:**
 ```bash
-docker-compose run --rm app bash -c "APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
+docker compose run --rm app bash -c "APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
 ```
 
 **Production deployment:**
 ```bash
+# Using docker-compose.prod.yml
+docker compose -f docker-compose.prod.yml up -d
+
+# Or using standalone Docker
 docker build -t wordle .
 docker run -d -p 1234:1234 -e REDIS_URL=redis://your-redis-host:6379 wordle
 ```
