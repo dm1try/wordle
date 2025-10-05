@@ -21,7 +21,7 @@ Backend: [Iodine](https://github.com/boazsegev/iodine), Frontend: [React](https:
 
 ### Using Docker (Recommended)
 
-The easiest way to get started is using Docker:
+The easiest way to get started is using Docker. For detailed Docker documentation, see [docs/DOCKER.md](docs/DOCKER.md).
 
 **Requirements:**
 - Docker
