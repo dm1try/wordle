@@ -9,11 +9,14 @@ until redis-cli -h redis ping > /dev/null 2>&1; do
 done
 echo "Redis is up!"
 
-# Initialize dictionaries only if starting the app (not for tests or other commands)
-if [ "$1" = "bundle" ] && [ "$2" = "exec" ] && [ "$3" = "ruby" ] && [ "$4" = "app.rb" ]; then
+# Only initialize dictionaries and show startup message when running the default app command
+# Skip for bash, sh, or any command that starts with APP_ENV=test
+if [ "$#" -eq 0 ] || ([ "$1" = "bundle" ] && [ "$2" = "exec" ] && [ "$3" = "ruby" ] && [ "$4" = "app.rb" ]); then
   echo "Initializing dictionaries..."
   bundle exec ruby setup/init_dictionaries.rb
   echo "Starting Wordle application..."
+  exec bundle exec ruby app.rb
+else
+  # For all other commands (tests, bash, etc.), just execute them
+  exec "$@"
 fi
-
-exec "$@"
