@@ -20,12 +20,20 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - PORT=1234
+      - BUNDLE_WITHOUT=development
     volumes:
       - .:/app
       - bundle_cache:/usr/local/bundle
     depends_on:
       redis:
         condition: service_healthy
+    command: >
+      bash -c "
+      bundle config unset without &&
+      bundle config set --local without 'development' &&
+      bundle install &&
+      exec ./docker-entrypoint.sh bundle exec ruby app.rb
+      "
 
 volumes:
   redis_data:

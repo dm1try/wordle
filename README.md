@@ -63,7 +63,11 @@ make clean         # Clean up everything
 
 **Run tests:**
 ```bash
-docker compose run --rm app bash -c "APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
+# Using make (recommended)
+make test
+
+# Or directly with docker compose
+docker compose run --rm app bash -c "bundle config unset without && bundle config set --local without 'development' && bundle install && APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
 ```
 
 **Seed full dictionaries:**

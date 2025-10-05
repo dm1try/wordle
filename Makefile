@@ -25,7 +25,7 @@ logs-app: ## View logs from app service only
 	docker compose logs -f app
 
 test: ## Run tests
-	docker compose run --rm app bash -c "APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
+	docker compose run --rm app bash -c "bundle config unset without && bundle config set --local without 'development' && bundle install && APP_ENV=test REDIS_URL=redis://redis:6379/2 bundle exec ruby setup/prepare_test_db.rb && bundle exec rspec"
 
 shell: ## Access app container shell
 	docker compose exec app bash
