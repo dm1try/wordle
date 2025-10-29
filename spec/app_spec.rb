@@ -1,13 +1,25 @@
 require 'spec_helper'
 require 'webdrivers'
 
-Capybara.default_driver = :selenium_chrome
+# Configure Capybara to use headless Chrome for Docker
+Capybara.register_driver :selenium_chrome_headless do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.add_argument('--headless')
+  options.add_argument('--no-sandbox')
+  options.add_argument('--disable-dev-shm-usage')
+  options.add_argument('--disable-gpu')
+  options.add_argument('--window-size=1400,900')
+
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+end
+
+Capybara.default_driver = :selenium_chrome_headless
 Capybara.run_server = false
 Capybara.app_host = 'http://127.0.0.1:1234'
 
 describe "Wordle", type: :feature do
   before do
-    @server_pid = Process.spawn("APP_ENV=test REDIS_URL=redis://localhost:6379/2 bundle exec ruby app.rb")
+    @server_pid = Process.spawn("APP_ENV=test REDIS_URL=#{ENV['REDIS_URL']}/2 bundle exec ruby app.rb")
   end
 
   after do
